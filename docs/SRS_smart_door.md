@@ -10,19 +10,19 @@
 - Keypad 4x4: layout {{1,2,3,A},{4,5,6,B},{7,8,9,C},{*,0,#,D}}; D=Enter, A=Delete, C=Đổi MK, B=Cancel/Lock (dự phòng).
 - LCD 16x2 + I2C module (lưu ý mức logic 3.3V; cần level shifter nếu module chỉ 5V).
 - Buzzer 2 chân.
-- Nút trong nhà đóng/mở/thoát báo động (debounce HW/SW).
+- Nút bấm 4 chân trong nhà: debounce HW/SW, toggle mở/đóng (đang mở ấn để đóng khi vừa vào, đang đóng ấn để mở khi cần ra ngoài; có thể thoát báo động nếu dùng chế độ này).
 - Tuỳ chọn: reed switch trạng thái cửa; LED trạng thái; cảm biến chống phá.
 
 ## 3. Chức năng bắt buộc (firmware)
 - Nhập mật khẩu qua keypad, hiển thị "******".
 - Trạng thái LCD: "Nhập mật khẩu", "Xin mời vào", "Mật khẩu sai", "Khoá tạm thời", "Nhập MK mới", "Nhập lại MK".
-- Điều khiển servo: mặc định đóng; đúng MK/OTP thì mở 3s rồi tự động đóng; nút trong nhà có thể đóng/mở thủ công.
+- Điều khiển servo: mặc định đóng; đúng MK/OTP thì mở 3s rồi tự động đóng; nút bấm 4 chân trong nhà debounce và toggle mở/đóng (đang mở ấn để đóng, đang đóng ấn để mở từ trong nhà).
 - Âm thanh: 1 beep đúng/mở; 3 beep sai; beep dài khi bị khoá tạm.
 - Giới hạn sai: mặc định 3 lần; vượt ngưỡng -> khoá tạm (thời gian cấu hình), không nhận MK trong thời gian khoá.
 - Đổi mật khẩu: chỉ sau khi xác thực; nhập MK mới + nhập lại; kiểm tra độ mạnh (không lặp, không liên tiếp).
 - OTP khách vãng lai: lưu mã + thời gian hết hạn; kiểm tra hạn bằng NTP; có thể thu hồi sớm từ cloud.
 - Lưu trữ MK/OTP cấu hình trong EEPROM (flash ESP8266); nếu EEPROM trống -> khởi tạo MK mặc định.
-- Log sự kiện cục bộ (RAM/EEPROM tạm): mở cửa thành công, sai MK, khoá tạm, đổi MK, dùng OTP, nút trong nhà.
+- Log sự kiện cục bộ (RAM/EEPROM tạm): mở cửa thành công, sai MK, khoá tạm, đổi MK, dùng OTP, nút trong nhà (method=button, action=open/close).
 - Buffer log để gửi lên cloud khi online lại.
 - State machine rõ ràng: Idle -> Input -> Verify -> (Open | Error) -> AutoClose; ChangePIN (step 1/2); Lockout.
 - Watchdog + reconnect Wi-Fi; OTA firmware.
@@ -60,7 +60,7 @@
 - Case đúng/sai MK; vượt ngưỡng sai -> khoá; hết thời gian khoá -> nhập lại được.
 - Đổi MK: step1/step2 khớp/không khớp; check mẫu lặp/liên tiếp.
 - OTP: đúng/hết hạn/thu hồi; nhiều OTP, chỉ OTP hợp lệ được chấp nhận; mất mạng -> xử lý cache.
-- Servo: mở 3s tự động đóng; nút trong nhà ưu tiên.
+- Servo: mở 3s tự động đóng; nút trong nhà debounce và toggle mở/đóng, ưu tiên khi đang thao tác.
 - Log: sinh đúng sự kiện; đẩy lên cloud khi có mạng; check time stamp NTP.
 - Wi-Fi mất/hồi; OTA thành công/thất bại.
 

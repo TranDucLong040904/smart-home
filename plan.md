@@ -1,13 +1,13 @@
 # Kế hoạch dự án cửa thông minh
 
 ## 0. Chuẩn bị
-- Cố định sơ đồ chân ESP8266 (keypad, LCD I2C, servo, buzzer, nút trong nhà).
+- Cố định sơ đồ chân ESP8266 (keypad, LCD I2C, servo, buzzer, nút trong nhà bằng nút bấm 4 chân).
 - Chọn thư viện: Keypad, LiquidCrystal_I2C, Servo, EEPROM, WiFi, WiFiManager (provisioning), NTP, ArduinoOTA, MQTT/Firebase (tùy chọn backend cloud).
 - Xác định format PIN/OTP, cấu trúc log, topic/API cloud.
 
 ## 1. Phần cứng + Firmware cục bộ (Ưu tiên làm trước)
 - Kiểm tra từng phần: keypad đọc phím, LCD hiển thị, servo đóng/mở với nguồn riêng + tụ, buzzer beep.
-- Implement state machine cơ bản: Idle -> Nhập PIN -> Verify -> (Mở/ Sai) -> Auto-close; Lockout khi sai quá số lần; nút trong nhà đóng/mở thủ công.
+- Implement state machine cơ bản: Idle -> Nhập PIN -> Verify -> (Mở/ Sai) -> Auto-close; Lockout khi sai quá số lần; nút bấm 4 chân trong nhà debounce và toggle mở/đóng (đang mở ấn để đóng, đang đóng ấn để mở từ trong nhà).
 - Đổi PIN tại chỗ: sau khi mở thành công, cho phép nhập PIN mới + nhập lại, kiểm tra mạnh (không lặp, không liên tiếp), lưu EEPROM.
 - Lưu/đọc PIN/ cấu hình trong EEPROM (flash); khởi tạo PIN mặc định nếu trống.
 - OTP local (tùy chọn bước đầu): nhận OTP qua serial để test luồng, kiểm tra hạn (dùng NTP nếu đã có Wi-Fi, nếu chưa thì giả định còn hạn trong phiên).
@@ -29,7 +29,7 @@
 - Quản lý môi trường: .env.example cho endpoint, api key; tách dev/prod.
 
 ## 4. Hoàn thiện & Deploy
-- Kiểm thử: case đúng/sai PIN, lockout, đổi PIN, auto-close, nút trong nhà, beep; OTP đúng/hết hạn/thu hồi; mất/khôi phục Wi-Fi; OTA; log đẩy lên cloud.
+- Kiểm thử: case đúng/sai PIN, lockout, đổi PIN, auto-close, nút trong nhà (ấn đóng khi vừa vào, ấn mở khi muốn ra), beep; OTP đúng/hết hạn/thu hồi; mất/khôi phục Wi-Fi; OTA; log đẩy lên cloud.
 - Bảo mật: bắt buộc TLS, rate-limit lệnh mở khoá, hash PIN/OTP nếu đủ tài nguyên, không commit khóa bí mật.
 - Đóng gói: hướng dẫn flash lần đầu, hướng dẫn vào portal để nhập Wi-Fi/endpoint, quy trình OTA.
 - Theo dõi: thêm push/email cho alarm hoặc nhiều lần sai (tùy chọn phase sau).
