@@ -1,0 +1,34 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# Node / frontend build
+node_modules/
+dist/
+build/
+.next/
+coverage/
+
+# Env/config secrets
+.env
+.env.*
+firebase-debug.log
+
+# PlatformIO / Arduino
+.pio/
+.pioenvs/
+.piolibdeps/
+**/.pio/**
+**/.pioenvs/**
+**/.piolibdeps/**
+
+# Misc
+*.tmp
+*.swp

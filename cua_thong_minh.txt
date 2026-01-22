@@ -1,0 +1,130 @@
+
+
+🔐 CHỨC NĂNG CỦA HỆ THỐNG MỞ CỬA THÔNG MINH
+1. Xác thực bằng mật khẩu
+
+- Người dùng nhập mật khẩu qua keypad
+
+- Có phím OK (xác nhận) và Delete (xóa)
+
+- Mật khẩu hiển thị dạng ****** trên LCD
+
+2. Hiển thị trạng thái hệ thống
+
+- LCD hiển thị các thông báo:
+
+	+ “Nhập mật khẩu”
+
+	+ “Xin mời vào”
+
+	+ “Mật khẩu sai”
+
+	+ “Khóa tạm thời”
+
+	+ “Nhập MK mới / Nhập lại MK”
+
+- Giúp người dùng dễ theo dõi quá trình sử dụng
+
+3. Điều khiển đóng/mở cửa
+
+- Servo mặc định đóng cửa
+
+- Khi nhập đúng mật khẩu:
+
+- Servo mở cửa
+
+- Sau 3 giây tự động đóng lại hoặc bấm nút để đóng mở cửa (nút được thiết kế ở bên trong nhà, không đặt ngoài cửa) 
+
+- Khi nhập sai: Servo không hoạt động
+
+
+4. Cảnh báo âm thanh
+
+- Buzzer phát tín hiệu:
+
+	+ 1 tiếng: thao tác đúng / mở cửa
+
+	+ 3 tiếng: nhập sai mật khẩu
+
+	+ Âm dài: hệ thống bị khóa tạm thời
+
+5. Đổi mật khẩu an toàn
+
+- Chỉ cho phép đổi mật khẩu sau khi xác thực thành công
+
+- Quy trình đổi mật khẩu gồm:
+
+	+ Nhập mật khẩu mới
+
+	+ Nhập lại để xác nhận
+
+	+ Mật khẩu mới phải đủ mạnh:
+
+	+ Không là số lặp
+
+	+ Không là số liên tiếp
+
+6. Bảo mật chống dò mật khẩu
+
+- Giới hạn số lần nhập sai (ví dụ 3 lần)
+
+- Khi vượt quá giới hạn:
+
+- Hệ thống khóa tạm thời trong một khoảng thời gian không cho nhập mật khẩu
+
+
+
+7. Lưu trữ mật khẩu không mất điện (EEPROM)
+
+- Mật khẩu được lưu trong EEPROM
+
+- Khi mất điện hoặc reset:
+
+- Hệ thống đọc lại mật khẩu từ EEPROM
+
+- Không quay về mật khẩu mặc định
+
+- Nếu EEPROM chưa có dữ liệu:
+
+- Tự động khởi tạo mật khẩu mặc định
+
+
+
+
+8. Linh kiện:
+- esp8266: 1 chiếc
+- arduino Uno (dùng làm nguồn điện ngoài cho servo hoặc lcd): 1 chiếc
+- servo: 1 chiếc
+- keypad: 1 chiếc 
+- Màn LCD (16 chân): 1 chiếc
+- Mạch chuyển đổi I2C cho LCD: 1 chiếc
+- Còi Buzzer 2 chân âm dương: 1 chiếc
+
+
+
+
+Tôi muốn setup phím theo hình dạng như này
+
+{
+  {'1','2','3','A'},
+  {'4','5','6','B'},
+  {'7','8','9','C'},
+  {'*','0','#','D'},
+
+}
+trong đó: 
+	+ D: enter
+	+ A: delete
+	+ C: đổi mật khẩu (nếu mở khóa thành công)
+
+
+
+
+
+
+
+
+
+
+
+		
