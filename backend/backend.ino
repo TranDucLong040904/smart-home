@@ -309,6 +309,12 @@ void handleDeleteOrExit() {
 
 /* ================= OK ================= */
 void handleOK() {
+  // Nếu cửa đang mở sẵn -> dùng D để đóng nhanh, không cần PIN
+  if (doorOpen) {
+    closeDoor();
+    return;
+  }
+
   lcd.clear();
   lcd.setCursor(0, 0);
 
@@ -627,11 +633,19 @@ void handleIndoorButton() {
   int buttonState = digitalRead(INDOOR_BUTTON_PIN);
 
   // Edge detection: HIGH → LOW (nhấn nút)
-  if (buttonState == LOW && lastIndoorButtonState == HIGH && doorOpen &&
+  if (buttonState == LOW && lastIndoorButtonState == HIGH &&
       (millis() - lastIndoorButtonPress > DEBOUNCE_DELAY)) {
     lastIndoorButtonPress = millis();
-    Serial.println(">>> INDOOR BUTTON PRESSED -> CLOSE DOOR <<<");
-    closeDoor();
+
+    if (locked) {
+      Serial.println("Indoor button ignored (locked state)");
+    } else if (doorOpen) {
+      Serial.println(">>> INDOOR BUTTON -> CLOSE DOOR <<<");
+      closeDoor();
+    } else {
+      Serial.println(">>> INDOOR BUTTON -> OPEN DOOR <<<");
+      openDoor();
+    }
   }
 
   lastIndoorButtonState = buttonState;
