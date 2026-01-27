@@ -309,8 +309,8 @@ void handleDeleteOrExit() {
 
 /* ================= OK ================= */
 void handleOK() {
-  // Nếu cửa đang mở sẵn -> dùng D để đóng nhanh, không cần PIN
-  if (doorOpen) {
+  // Nếu cửa đang mở sẵn VÀ đang ở màn hình nhập PIN -> dùng D để đóng nhanh
+  if (doorOpen && state == INPUT_PASSWORD) {
     closeDoor();
     return;
   }
@@ -358,17 +358,34 @@ void handleOK() {
       Serial.println("New password same as old password!");
       delay(1500);
       startChangePassword();
-    } else if (!isStrongPassword(newPass, newLen)) {
-      lcd.print("MK yeu");
-      lcd.setCursor(0, 1);
-      lcd.print("(>=6, ko ngaysinh)");
-      beepFail();
-      delay(1500);
-      startChangePassword();
     } else {
-      lcd.print("Nhap lai MK");
-      state = CHANGE_CONFIRM;
-      resetLine();
+      // Kiểm tra độ mạnh mật khẩu
+      byte errorCode = checkPasswordStrength(newPass, newLen);
+
+      if (errorCode == 0) {
+        // Mật khẩu OK
+        lcd.print("Nhap lai MK");
+        state = CHANGE_CONFIRM;
+        resetLine();
+      } else {
+        // Hiển thị lỗi cụ thể
+        lcd.print("MK yeu:");
+        lcd.setCursor(0, 1);
+
+        if (errorCode == 1) {
+          lcd.print("MK ngan (<6)");
+        } else if (errorCode == 2) {
+          lcd.print("Co ngay sinh");
+        } else if (errorCode == 3) {
+          lcd.print("MK lap lai");
+        } else if (errorCode == 4) {
+          lcd.print("MK lien tiep");
+        }
+
+        beepFail();
+        delay(1500);
+        startChangePassword();
+      }
     }
   }
 
@@ -396,16 +413,17 @@ void handleChangeRequest() {
 }
 
 /* ================= PASSWORD RULE ================= */
-bool isStrongPassword(char *pass, byte len) {
+// Trả về mã lỗi: 0=OK, 1=Ngắn, 2=Ngày sinh, 3=Lặp, 4=Liên tiếp
+byte checkPasswordStrength(char *pass, byte len) {
   if (len < MIN_PASS_LEN)
-    return false;
+    return 1; // Mật khẩu ngắn
   if (isBirthdayPattern(pass, len))
-    return false;
+    return 2; // Có ngày sinh
   if (isRepeatingPattern(pass, len))
-    return false;
+    return 3; // Lặp lại
   if (isSequentialPattern(pass, len))
-    return false;
-  return true;
+    return 4; // Liên tiếp
+  return 0;   // OK
 }
 
 bool isBirthdayPattern(char *pass, byte len) {
