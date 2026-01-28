@@ -107,8 +107,12 @@
 
         <!-- Filters -->
         <div class="history-filters">
-          <button class="btn-icon" onclick="openCalendar()">
-            <span class="material-symbols-outlined">calendar_month</span>
+          <button class="btn btn-today" onclick="filterToday()">
+            <span class="material-symbols-outlined">today</span>
+            Hôm nay
+          </button>
+          <button class="btn-icon" onclick="clearFilters()" title="Xem tất cả">
+            <span class="material-symbols-outlined">filter_alt_off</span>
           </button>
 
           <div class="filter-group">

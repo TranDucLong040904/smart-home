@@ -142,6 +142,31 @@
     background: #3b82f6;
 }
 
+.btn-today {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(22, 163, 74, 0.3);
+}
+
+.btn-today:hover {
+    background: linear-gradient(135deg, #22c55e 0%, #4ade80 100%);
+    transform: translateY(-1px);
+}
+
+.btn-today .material-symbols-outlined {
+    font-size: 18px;
+}
+
 /* ===== Table Header ===== */
 .table-header {
     display: grid;

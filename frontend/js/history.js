@@ -1,6 +1,6 @@
 /**
  * Smart Door - History Page JavaScript
- * Activity log functionality
+ * Activity log functionality - Vietnamese UI
  */
 
 // ===== State Variables =====
@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initClock();
   initFirebaseListeners();
   populateDayFilter();
+  setTodayAsDefault();
 });
 
 // ===== Clock Functions =====
@@ -34,6 +35,42 @@ function updateClock() {
   if (dateEl) {
     const options = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' };
     dateEl.textContent = now.toLocaleDateString('vi-VN', options);
+  }
+}
+
+// ===== Set Today as Default =====
+function setTodayAsDefault() {
+  const now = new Date();
+  
+  const daySelect = document.getElementById('filterDay');
+  const monthSelect = document.getElementById('filterMonth');
+  const yearSelect = document.getElementById('filterYear');
+  
+  if (daySelect) {
+    daySelect.value = now.getDate();
+  }
+  
+  if (monthSelect) {
+    monthSelect.value = now.getMonth() + 1;
+  }
+  
+  if (yearSelect) {
+    // Add current year if not exists
+    const currentYear = now.getFullYear();
+    let yearExists = false;
+    for (let option of yearSelect.options) {
+      if (option.value == currentYear) {
+        yearExists = true;
+        break;
+      }
+    }
+    if (!yearExists) {
+      const option = document.createElement('option');
+      option.value = currentYear;
+      option.textContent = currentYear;
+      yearSelect.insertBefore(option, yearSelect.firstChild);
+    }
+    yearSelect.value = currentYear;
   }
 }
 
@@ -61,8 +98,8 @@ function loadLogs() {
       allLogs.unshift(log); // Newest first
     });
     
-    filteredLogs = [...allLogs];
-    renderLogs();
+    // Apply today filter by default
+    applyFilters();
   });
 }
 
@@ -77,6 +114,24 @@ function populateDayFilter() {
     option.textContent = i;
     select.appendChild(option);
   }
+}
+
+// ===== Filter Today =====
+function filterToday() {
+  setTodayAsDefault();
+  applyFilters();
+}
+
+// ===== Clear Filters =====
+function clearFilters() {
+  document.getElementById('filterDay').value = '';
+  document.getElementById('filterMonth').value = '';
+  document.getElementById('filterYear').value = '';
+  document.getElementById('searchInput').value = '';
+  
+  filteredLogs = [...allLogs];
+  currentPage = 1;
+  renderLogs();
 }
 
 // ===== Render Logs =====
@@ -173,9 +228,52 @@ function getEventIcon(event) {
   return icons[event] || 'info';
 }
 
+// ===== Vietnamese Event Text =====
 function getEventText(event, message) {
-  if (message) return message;
+  // Convert English messages to Vietnamese
+  if (message) {
+    const translations = {
+      'Opened via cloud command': 'Mở cửa từ ứng dụng',
+      'Closed via cloud command': 'Đóng cửa từ ứng dụng',
+      'Opened via keypad': 'Mở cửa từ bàn phím',
+      'Closed via keypad': 'Đóng cửa từ bàn phím',
+      'Opened via web': 'Mở cửa từ web',
+      'Closed via web': 'Đóng cửa từ web',
+      'Opened via voice': 'Mở cửa bằng giọng nói',
+      'Closed via voice': 'Đóng cửa bằng giọng nói',
+      'Wrong password attempt': 'Nhập sai mật khẩu',
+      'Device locked': 'Thiết bị bị khóa',
+      'System started': 'Hệ thống khởi động',
+      'OTP generated': 'Đã tạo mã OTP',
+      'OTP used successfully': 'Sử dụng OTP thành công'
+    };
+    
+    // Check for exact match
+    if (translations[message]) {
+      return translations[message];
+    }
+    
+    // Check for partial match
+    for (const [en, vi] of Object.entries(translations)) {
+      if (message.toLowerCase().includes(en.toLowerCase())) {
+        return vi;
+      }
+    }
+    
+    // If contains "cloud command", translate it
+    if (message.includes('cloud command')) {
+      if (message.toLowerCase().includes('open')) {
+        return 'Mở cửa từ ứng dụng';
+      } else if (message.toLowerCase().includes('close')) {
+        return 'Đóng cửa từ ứng dụng';
+      }
+      return 'Lệnh từ ứng dụng';
+    }
+    
+    return message;
+  }
   
+  // Default Vietnamese translations for events
   const texts = {
     'door_opened': 'Cửa đã mở',
     'door_closed': 'Cửa đã đóng',
@@ -190,12 +288,16 @@ function getEventText(event, message) {
 }
 
 function getUserInfo(device) {
-  if (device === 'esp8266_01') {
+  if (device === 'esp8266_01' || device === 'system') {
     return { name: 'Hệ thống', initial: 'H', class: 'system' };
-  } else if (device === 'admin') {
-    return { name: 'Admin', initial: 'A', class: 'admin' };
+  } else if (device === 'admin' || device === 'cloud') {
+    return { name: 'Ứng dụng', initial: 'A', class: 'admin' };
   } else if (device === 'guest') {
     return { name: 'Khách', initial: 'K', class: 'guest' };
+  } else if (device === 'keypad') {
+    return { name: 'Bàn phím', initial: 'B', class: 'system' };
+  } else if (device === 'web') {
+    return { name: 'Web', initial: 'W', class: 'admin' };
   }
   return { name: device, initial: device[0].toUpperCase(), class: 'system' };
 }
@@ -322,6 +424,5 @@ function deleteAll() {
 }
 
 function openCalendar() {
-  // TODO: Implement date picker
   alert('Tính năng lịch sẽ được cập nhật sau!');
 }
