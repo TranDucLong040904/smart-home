@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Door - Lịch Sử</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/history.css" />
+  </head>
+  <body>
+    <!-- Background Effects -->
+    <div class="bg-effects">
+      <div class="glow-1"></div>
+      <div class="glow-2"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="header glass-panel">
+      <div class="header-content">
+        <!-- Logo -->
+        <div class="logo">
+          <div class="logo-icon">
+            <span class="material-symbols-outlined">door_front</span>
+          </div>
+          <div class="logo-text">
+            <h1>Smart Door</h1>
+            <p>v2.1 Pro</p>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="nav">
+          <a href="index.html" class="nav-link">
+            <span class="material-symbols-outlined">sports_esports</span>
+            <span>Điều Khiển</span>
+          </a>
+          <a href="history.html" class="nav-link active">
+            <span class="material-symbols-outlined">assignment</span>
+            <span>Lịch Sử</span>
+          </a>
+        </nav>
+
+        <!-- Right Side -->
+        <div class="header-right">
+          <div class="clock">
+            <span class="clock-time" id="clockTime">--:--:--</span>
+            <span class="clock-date" id="clockDate">---</span>
+          </div>
+          <div class="status-badge">
+            <span class="status-dot"></span>
+            <span class="status-text" id="connectionStatus"
+              >Đang kết nối...</span
+            >
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <section class="glass-panel history-section">
+        <!-- Header -->
+        <div class="history-header">
+          <div class="history-title">
+            <div class="title-icon">
+              <span class="material-symbols-outlined">manage_history</span>
+            </div>
+            <h2>Lịch Sử Hoạt Động</h2>
+          </div>
+
+          <div class="history-actions">
+            <div class="search-box">
+              <span class="material-symbols-outlined">search</span>
+              <input
+                type="text"
+                class="glass-input"
+                id="searchInput"
+                placeholder="Tìm kiếm sự kiện..."
+              />
+            </div>
+            <button
+              class="btn-icon btn-danger"
+              onclick="deleteSelected()"
+              title="Xóa mục đã chọn"
+            >
+              <span class="material-symbols-outlined">delete</span>
+            </button>
+            <button class="btn-icon" onclick="deleteAll()" title="Xóa tất cả">
+              <span class="material-symbols-outlined">delete_forever</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="history-filters">
+          <button class="btn-icon" onclick="openCalendar()">
+            <span class="material-symbols-outlined">calendar_month</span>
+          </button>
+
+          <div class="filter-group">
+            <label>Ngày</label>
+            <select class="glass-input" id="filterDay">
+              <option value="">Tất cả</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>Tháng</label>
+            <select class="glass-input" id="filterMonth">
+              <option value="">Tất cả</option>
+              <option value="1">Tháng 1</option>
+              <option value="2">Tháng 2</option>
+              <option value="3">Tháng 3</option>
+              <option value="4">Tháng 4</option>
+              <option value="5">Tháng 5</option>
+              <option value="6">Tháng 6</option>
+              <option value="7">Tháng 7</option>
+              <option value="8">Tháng 8</option>
+              <option value="9">Tháng 9</option>
+              <option value="10">Tháng 10</option>
+              <option value="11">Tháng 11</option>
+              <option value="12">Tháng 12</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>Năm</label>
+            <select class="glass-input" id="filterYear">
+              <option value="">Tất cả</option>
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+            </select>
+          </div>
+
+          <button class="btn btn-filter" onclick="applyFilters()">
+            Áp dụng
+          </button>
+        </div>
+
+        <!-- Table Header -->
+        <div class="table-header">
+          <div class="col-checkbox">
+            <input
+              type="checkbox"
+              id="selectAll"
+              onchange="toggleSelectAll()"
+            />
+          </div>
+          <div class="col-event">Hành động / Sự kiện</div>
+          <div class="col-time">Thời gian</div>
+          <div class="col-user">Người thực hiện</div>
+          <div class="col-status">Trạng thái</div>
+        </div>
+
+        <!-- Table Body -->
+        <div class="table-body" id="historyList">
+          <div class="loading">
+            <span class="material-symbols-outlined spinning">sync</span>
+            <p>Đang tải dữ liệu...</p>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <button class="btn-icon" onclick="prevPage()" id="btnPrev" disabled>
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <span id="pageInfo">Trang 1 / 1</span>
+          <button class="btn-icon" onclick="nextPage()" id="btnNext" disabled>
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Smart Door v2.1 - Developed by IoT Team</p>
+    </footer>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <!-- App Scripts -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/history.js"></script>
+  </body>
+</html>
