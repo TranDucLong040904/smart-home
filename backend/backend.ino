@@ -15,6 +15,10 @@
  */
 
 #include <EEPROM.h>
+
+// WiFi Module (PHẢI include TRƯỚC Keypad để tránh xung đột CLOSED macro)
+#include "wifi_config.h"
+
 #include <Keypad.h>
 #include <LiquidCrystal_I2C.h>
 #include <Servo.h>
@@ -225,12 +229,18 @@ void setup() {
   // Show screen
   showInputScreen();
 
+  // WiFi Setup (non-blocking - keypad works while WiFi connects)
+  setupWiFi();
+
   Serial.println("Setup complete!");
   Serial.println("Default password: 123456");
 }
 
 /* ================= LOOP ================= */
 void loop() {
+  // WiFi handler (non-blocking - runs independently of keypad)
+  handleWiFi();
+
   // Khi bị khóa -> chỉ chạy đếm ngược
   if (locked) {
     handleLockTimer();

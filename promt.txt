@@ -1,0 +1,46 @@
+Bây giờ bạn code cho tôi những thứ sau 
+- wifi manager
+- web server đơn giản để test các chức năng
+    + Đóng - mở cửa
+    + Tạo 1 wifi ảo để kết nối vào cấu hình wifi
+    + Reset wifi: Khi click vào thì sẽ reset, dùng điện thoại kết nối vào wifi ảo để cấu hình lại wifi
+    
+- Yêu cầu cho web server
+    + Giao diện đơn giản, dễ sử dụng
+    + Kết nối mượt, không bị treo, lag khi kết nối
+
+- Chú ý:
+    + điều khiển online và offline là 2 thứ tách rời nhau
+    + Tức là khi không có wifi thì vẫn có thể dùng keypad để mở cửa một cách bình thường
+    + Khi có wifi thì có thể điều khiển mở đóng cửa thêm qua web
+    + Tuyệt đối không đụng tới phần code đã code và chạy ổn trước đó
+    + Chỉ code thêm các chức năng mới thôi 
+    + Đừng có tạo file readme bừa bãi. Chỉ cần update các chức năng cần thiết thôi 
+
+
+
+Bây giờ bạn code cho tôi những thứ sau
+
+- wifi manager
+- web server đơn giản để test các chức năng
+    + Đóng - mở cửa
+    + Tạo 1 wifi ảo để kết nối vào cấu hình wifi
+    + Reset wifi: Khi click vào thì sẽ reset, dùng điện thoại kết nối vào wifi ảo để cấu hình lại wifi
+- Yêu cầu cho web server
+    + Giao diện đơn giản, dễ sử dụng
+    + Kết nối mượt, không bị treo, lag khi kết nối
+- Chú ý:
+    + Keypad và websever hoạt động ĐỘC LẬP với nhau, không ảnh hưởng đến nhau
+    + Khi có wifi, cả 2 đều dùng bình thường
+    + Khi không có kết nối hoặc wifi bị reset trên websever thì keypad vẫn hoạt động bình thường và không bị ảnh hưởng
+    + Tuyệt đối không đụng tới phần code đã code và chạy ổn trước đó
+    + Ví dụ trong thực tế thì khóa cửa keypad vẫn hoạt động bình thường, không cần quan tâm răng đã kết nối wifi hay chưa
+    + Chỉ code thêm các chức năng mới thôi
+    + Đừng có tạo file readme bừa bãi. Chỉ cần update các chức năng cần thiết thôi
+
+
+Đây là xung đột tên giữa thư viện Keypad và ESP8266WiFi:
+
+Keypad.h định nghĩa: #define CLOSED HIGH
+ESP8266 lwip có enum: CLOSED = 0
+Khi include WiFi sau Keypad → xung đột!
