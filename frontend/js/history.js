@@ -423,6 +423,122 @@ function deleteAll() {
   });
 }
 
-function openCalendar() {
-  alert('Tính năng lịch sẽ được cập nhật sau!');
+// ===== Date Picker =====
+let datePickerYear = new Date().getFullYear();
+let datePickerMonth = new Date().getMonth();
+let selectedDate = null;
+
+function openDatePicker() {
+  datePickerYear = new Date().getFullYear();
+  datePickerMonth = new Date().getMonth();
+  selectedDate = null;
+  renderDatePicker();
+  document.getElementById('datePickerModal').classList.add('active');
 }
+
+function closeDatePicker() {
+  document.getElementById('datePickerModal').classList.remove('active');
+}
+
+function prevMonth() {
+  datePickerMonth--;
+  if (datePickerMonth < 0) {
+    datePickerMonth = 11;
+    datePickerYear--;
+  }
+  renderDatePicker();
+}
+
+function nextMonth() {
+  datePickerMonth++;
+  if (datePickerMonth > 11) {
+    datePickerMonth = 0;
+    datePickerYear++;
+  }
+  renderDatePicker();
+}
+
+function renderDatePicker() {
+  const monthNames = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 
+                      'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+  
+  // Update header
+  document.getElementById('datePickerMonthYear').textContent = 
+    `${monthNames[datePickerMonth]}, ${datePickerYear}`;
+  
+  // Get first day and days in month
+  const firstDay = new Date(datePickerYear, datePickerMonth, 1).getDay();
+  const daysInMonth = new Date(datePickerYear, datePickerMonth + 1, 0).getDate();
+  const daysInPrevMonth = new Date(datePickerYear, datePickerMonth, 0).getDate();
+  
+  // Current date for highlighting today
+  const today = new Date();
+  const isCurrentMonth = today.getMonth() === datePickerMonth && today.getFullYear() === datePickerYear;
+  
+  // Generate days HTML
+  let html = '';
+  
+  // Previous month days
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const day = daysInPrevMonth - i;
+    html += `<button class="date-picker-day other-month" disabled>${day}</button>`;
+  }
+  
+  // Current month days
+  for (let day = 1; day <= daysInMonth; day++) {
+    let classes = 'date-picker-day';
+    if (isCurrentMonth && day === today.getDate()) {
+      classes += ' today';
+    }
+    if (selectedDate && selectedDate.day === day && 
+        selectedDate.month === datePickerMonth && 
+        selectedDate.year === datePickerYear) {
+      classes += ' selected';
+    }
+    html += `<button class="${classes}" onclick="selectDate(${day})">${day}</button>`;
+  }
+  
+  // Next month days
+  const totalCells = firstDay + daysInMonth;
+  const remainingCells = 7 - (totalCells % 7);
+  if (remainingCells < 7) {
+    for (let i = 1; i <= remainingCells; i++) {
+      html += `<button class="date-picker-day other-month" disabled>${i}</button>`;
+    }
+  }
+  
+  document.getElementById('datePickerDays').innerHTML = html;
+}
+
+function selectDate(day) {
+  selectedDate = {
+    day: day,
+    month: datePickerMonth,
+    year: datePickerYear
+  };
+  renderDatePicker();
+}
+
+function applyDatePicker() {
+  if (!selectedDate) {
+    alert('Vui lòng chọn một ngày!');
+    return;
+  }
+  
+  // Apply to filter dropdowns
+  document.getElementById('filterDay').value = selectedDate.day;
+  document.getElementById('filterMonth').value = selectedDate.month + 1;
+  document.getElementById('filterYear').value = selectedDate.year;
+  
+  // Close modal and apply filters
+  closeDatePicker();
+  applyFilters();
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', (e) => {
+  const modal = document.getElementById('datePickerModal');
+  if (e.target === modal) {
+    closeDatePicker();
+  }
+});

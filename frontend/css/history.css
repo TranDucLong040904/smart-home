@@ -167,6 +167,16 @@
     font-size: 18px;
 }
 
+.btn-calendar {
+    background: rgba(59, 130, 246, 0.2) !important;
+    border-color: rgba(59, 130, 246, 0.3) !important;
+    color: #3b82f6 !important;
+}
+
+.btn-calendar:hover {
+    background: rgba(59, 130, 246, 0.3) !important;
+}
+
 /* ===== Table Header ===== */
 .table-header {
     display: grid;

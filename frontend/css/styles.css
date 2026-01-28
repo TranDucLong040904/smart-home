@@ -894,8 +894,14 @@ body {
    RESPONSIVE - MOBILE (< 768px)
    ======================================== */
 @media (max-width: 768px) {
+
+  /* Header adjustments */
+  .header {
+    padding: 0;
+  }
+
   .header-content {
-    height: 56px;
+    height: 50px;
     padding: 0 12px;
   }
 
@@ -903,92 +909,91 @@ body {
     display: none;
   }
 
-  .nav {
-    position: fixed;
-    bottom: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
-    background: rgba(26, 26, 46, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+  .logo-icon {
+    padding: 5px;
   }
 
-  .nav-link span:last-child {
+  .logo-icon .material-symbols-outlined {
+    font-size: 20px;
+  }
+
+  /* Hide nav from header on mobile */
+  .header .nav {
     display: none;
   }
 
-  .nav-link {
-    padding: 10px 16px;
+  /* Status badge on mobile */
+  .status-badge {
+    padding: 4px 8px;
   }
 
+  .status-text {
+    display: none;
+  }
+
+  /* Bottom Navigation Bar */
+  .bottom-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: rgba(26, 26, 46, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1000;
+    padding: 8px 0;
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+  }
+
+  .bottom-nav .nav-items {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .bottom-nav .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 6px 16px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+  }
+
+  .bottom-nav .nav-item.active {
+    color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.1);
+  }
+
+  .bottom-nav .nav-item .material-symbols-outlined {
+    font-size: 24px;
+  }
+
+  .bottom-nav .nav-item span:last-child {
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  /* Main content adjustments */
   .main-content {
     padding: 12px;
-    padding-bottom: 80px;
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
   }
 
   .grid {
     gap: 12px;
   }
 
-  .control-buttons {
-    grid-template-columns: 1fr;
-  }
-
-  .door-icon .material-symbols-outlined {
-    font-size: 64px;
-  }
-
-  .door-status-text h3 {
-    font-size: 18px;
-  }
-
-  .voice-btn {
-    width: 80px;
-    height: 80px;
-  }
-
-  .voice-btn .pulse-2 {
-    width: 64px;
-    height: 64px;
-  }
-
-  .voice-btn .icon-wrapper {
-    width: 52px;
-    height: 52px;
-  }
-
-  .voice-btn .icon-wrapper .material-symbols-outlined {
-    font-size: 24px;
-  }
-
-  .card-title {
-    font-size: 16px;
-  }
-
-  .otp-code {
-    font-size: 28px;
-    letter-spacing: 4px;
-  }
-
-  .status-text {
-    display: none;
-  }
-}
-
-/* ========================================
-   RESPONSIVE - SMALL MOBILE (< 480px)
-   ======================================== */
-@media (max-width: 480px) {
-  .header-content {
-    height: 50px;
-  }
-
-  .main-content {
-    padding: 8px;
-    padding-bottom: 70px;
-  }
-
+  /* Cards */
   .glass-panel {
     border-radius: 12px;
   }
@@ -1000,12 +1005,324 @@ body {
     padding: 16px;
   }
 
-  .btn {
-    padding: 12px 16px;
-    font-size: 14px;
+  /* Door control */
+  .control-buttons {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
   }
 
   .door-icon .material-symbols-outlined {
-    font-size: 56px;
+    font-size: 64px;
   }
+
+  .door-status-text h3 {
+    font-size: 18px;
+  }
+
+  .door-status {
+    padding: 12px 0;
+  }
+
+  /* Voice control */
+  .voice-btn {
+    width: 70px;
+    height: 70px;
+    margin: 12px 0;
+  }
+
+  .voice-btn .pulse-2 {
+    width: 56px;
+    height: 56px;
+  }
+
+  .voice-btn .icon-wrapper {
+    width: 48px;
+    height: 48px;
+  }
+
+  .voice-btn .icon-wrapper .material-symbols-outlined {
+    font-size: 22px;
+  }
+
+  .voice-hint {
+    padding: 8px 12px;
+  }
+
+  /* Cards */
+  .card-title {
+    font-size: 15px;
+  }
+
+  .card-label {
+    font-size: 10px;
+  }
+
+  .otp-code {
+    font-size: 26px;
+    letter-spacing: 4px;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 12px 14px;
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  .btn .material-symbols-outlined {
+    font-size: 18px;
+  }
+
+  /* WiFi card */
+  .wifi-current {
+    padding: 8px;
+    margin-bottom: 12px;
+  }
+
+  .glass-input {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  /* Footer */
+  .footer {
+    display: none;
+  }
+}
+
+/* ========================================
+   RESPONSIVE - SMALL MOBILE (< 480px)
+   ======================================== */
+@media (max-width: 480px) {
+  .header-content {
+    height: 46px;
+  }
+
+  .main-content {
+    padding: 8px;
+    padding-bottom: calc(65px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .door-control-card,
+  .voice-control-card,
+  .otp-card,
+  .wifi-card {
+    padding: 14px;
+  }
+
+  .btn {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .door-icon .material-symbols-outlined {
+    font-size: 52px;
+  }
+
+  .door-status-text h3 {
+    font-size: 16px;
+  }
+
+  .otp-code {
+    font-size: 22px;
+    letter-spacing: 3px;
+  }
+
+  .voice-btn {
+    width: 60px;
+    height: 60px;
+  }
+
+  .voice-btn .pulse-2 {
+    width: 48px;
+    height: 48px;
+  }
+
+  .voice-btn .icon-wrapper {
+    width: 42px;
+    height: 42px;
+  }
+}
+
+/* ========================================
+   DATE PICKER MODAL
+   ======================================== */
+.date-picker-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.date-picker-modal.active {
+  display: flex;
+}
+
+.date-picker-content {
+  background: var(--bg-dark);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 340px;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.date-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.date-picker-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.date-picker-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.date-picker-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.date-picker-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.date-picker-nav button {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.date-picker-nav button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.date-picker-month-year {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.date-picker-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.date-picker-weekdays span {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-subtle);
+  padding: 6px 0;
+}
+
+.date-picker-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.date-picker-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+  color: white;
+}
+
+.date-picker-day:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.date-picker-day.other-month {
+  color: var(--text-subtle);
+}
+
+.date-picker-day.today {
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
+
+.date-picker-day.selected {
+  background: var(--primary);
+  color: black;
+  font-weight: 700;
+}
+
+.date-picker-footer {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.date-picker-footer button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.date-picker-footer .btn-cancel {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.date-picker-footer .btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.date-picker-footer .btn-apply {
+  background: var(--primary);
+  border: none;
+  color: black;
+}
+
+.date-picker-footer .btn-apply:hover {
+  opacity: 0.9;
+}
+
+/* Hide bottom nav by default (shown only on mobile) */
+.bottom-nav {
+  display: none;
 }
