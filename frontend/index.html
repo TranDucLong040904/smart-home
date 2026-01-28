@@ -36,8 +36,8 @@
             <span class="material-symbols-outlined">door_front</span>
           </div>
           <div class="logo-text">
-            <h1>Smart Door</h1>
-            <p>v2.1 Pro</p>
+            <h1>Smart Home</h1>
+            <p>v1.0</p>
           </div>
         </div>
 
@@ -94,7 +94,6 @@
                 Trạng thái:
                 <span class="status-closed" id="doorStatusText">ĐÓNG</span>
               </h3>
-              <p id="lastUpdate">Cập nhật lần cuối: --</p>
             </div>
           </div>
 
@@ -185,13 +184,41 @@
 
           <div class="form-group">
             <label>Thời hạn hiệu lực</label>
-            <select class="glass-input" id="otpDuration">
-              <option value="5">5 phút</option>
-              <option value="15">15 phút</option>
-              <option value="30">30 phút</option>
-              <option value="60">1 giờ</option>
-              <option value="1440">24 giờ</option>
-            </select>
+            <div class="otp-duration-inputs">
+              <div class="time-input-group">
+                <input
+                  type="number"
+                  class="glass-input time-input"
+                  id="otpHours"
+                  min="0"
+                  max="23"
+                  value="0"
+                />
+                <span>giờ</span>
+              </div>
+              <div class="time-input-group">
+                <input
+                  type="number"
+                  class="glass-input time-input"
+                  id="otpMinutes"
+                  min="0"
+                  max="59"
+                  value="5"
+                />
+                <span>phút</span>
+              </div>
+              <div class="time-input-group">
+                <input
+                  type="number"
+                  class="glass-input time-input"
+                  id="otpSeconds"
+                  min="0"
+                  max="59"
+                  value="0"
+                />
+                <span>giây</span>
+              </div>
+            </div>
           </div>
 
           <div class="otp-display">
@@ -204,11 +231,20 @@
               <span class="material-symbols-outlined" style="font-size: 14px"
                 >timer</span
               >
-              <span id="otpTimer">--:--</span>
+              <span id="otpTimer">--:--:--</span>
             </span>
-            <button class="btn-secondary" onclick="generateOTP()">
-              Tạo Mã Mới
-            </button>
+            <div class="otp-actions">
+              <button
+                class="btn-danger-small"
+                onclick="deleteOTP()"
+                title="Xóa mã OTP"
+              >
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+              <button class="btn-secondary" onclick="generateOTP()">
+                Tạo Mã Mới
+              </button>
+            </div>
           </div>
         </section>
 
@@ -232,59 +268,68 @@
           <div class="wifi-current">
             <div class="dot"></div>
             <div class="info">
-              <p>Mạng hiện tại: <span id="currentSSID">---</span></p>
+              <p>Mạng hiện tại: <strong id="currentSSID">---</strong></p>
+              <p>
+                Mật khẩu:
+                <span id="currentPassword" class="password-masked"
+                  >••••••••</span
+                >
+                <button
+                  class="btn-show-password"
+                  onclick="toggleCurrentPassword()"
+                >
+                  <span
+                    class="material-symbols-outlined"
+                    id="togglePasswordIcon"
+                    >visibility</span
+                  >
+                </button>
+              </p>
               <p>IP: <span id="currentIP">---</span></p>
             </div>
           </div>
 
-          <div class="form-group">
-            <label>SSID (Tên mạng)</label>
-            <div class="input-wrapper">
-              <span class="material-symbols-outlined icon">router</span>
-              <input
-                type="text"
-                class="glass-input"
-                id="wifiSSID"
-                placeholder="Nhập tên mạng WiFi"
-              />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Mật khẩu</label>
-            <div class="input-wrapper">
-              <span class="material-symbols-outlined icon">key</span>
-              <input
-                type="password"
-                class="glass-input"
-                id="wifiPassword"
-                placeholder="Nhập mật khẩu"
-              />
-              <button class="toggle-password" onclick="togglePassword()">
-                <span class="material-symbols-outlined">visibility</span>
-              </button>
-            </div>
-          </div>
-
-          <button class="btn btn-purple" onclick="changeWiFi()">
+          <!-- Scan Networks -->
+          <button class="btn btn-scan" onclick="scanNetworks()" id="btnScan">
             <span class="material-symbols-outlined">wifi_find</span>
-            Đổi Mạng WiFi
+            Quét mạng có sẵn
           </button>
 
           <div class="wifi-networks">
-            <h4>Mạng có sẵn</h4>
+            <h4 id="scanTitle">Mạng có sẵn</h4>
             <div class="network-list" id="networkList">
-              <p
-                style="
-                  color: var(--text-subtle);
-                  font-size: 12px;
-                  text-align: center;
-                  padding: 16px;
-                "
-              >
-                Quét mạng...
-              </p>
+              <p class="network-hint">Nhấn "Quét mạng có sẵn" để tìm kiếm...</p>
             </div>
+          </div>
+
+          <!-- Password Input (Hidden until network selected) -->
+          <div id="connectForm" class="connect-form" style="display: none">
+            <div class="selected-network">
+              <span class="material-symbols-outlined">wifi</span>
+              <span id="selectedNetworkName">---</span>
+              <button class="btn-icon-cancel" onclick="cancelSelection()">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div class="form-group">
+              <label>Mật khẩu mạng mới</label>
+              <div class="input-wrapper">
+                <span class="material-symbols-outlined icon">key</span>
+                <input
+                  type="password"
+                  class="glass-input"
+                  id="wifiPassword"
+                  placeholder="Nhập mật khẩu"
+                />
+                <button class="toggle-password" onclick="togglePassword()">
+                  <span class="material-symbols-outlined">visibility</span>
+                </button>
+              </div>
+            </div>
+            <button class="btn btn-purple" onclick="changeWiFi()">
+              <span class="material-symbols-outlined">router</span>
+              Kết nối
+            </button>
           </div>
         </section>
       </div>
@@ -306,7 +351,7 @@
 
     <!-- Footer -->
     <footer class="footer">
-      <p>Smart Door v2.1 - Developed by IoT Team</p>
+      <p>Smart Home v1.0 - Developed Duc Long</p>
     </footer>
 
     <!-- Firebase SDK -->

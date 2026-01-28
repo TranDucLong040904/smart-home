@@ -9,6 +9,7 @@ let isConnected = false;
 let otpTimer = null;
 let otpEndTime = null;
 
+
 // ===== Initialize on DOM Load =====
 document.addEventListener('DOMContentLoaded', () => {
   initClock();
@@ -44,7 +45,7 @@ function initFirebaseListeners() {
     if (data) {
       updateDoorUI(data.door === 'open');
       updateConnectionStatus(data.online);
-      updateLastUpdate(data.lastUpdate);
+
     }
   });
   
@@ -111,27 +112,7 @@ function updateConnectionStatus(online) {
   }
 }
 
-function updateLastUpdate(timestamp) {
-  const el = document.getElementById('lastUpdate');
-  if (el && timestamp) {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diff = Math.floor((now - date) / 1000);
-    
-    let text = 'Cập nhật lần cuối: ';
-    if (diff < 5) {
-      text += 'Vừa xong';
-    } else if (diff < 60) {
-      text += `${diff} giây trước`;
-    } else if (diff < 3600) {
-      text += `${Math.floor(diff / 60)} phút trước`;
-    } else {
-      text += date.toLocaleTimeString('vi-VN');
-    }
-    
-    el.textContent = text;
-  }
-}
+
 
 // ===== Voice Control =====
 function startVoiceControl() {
@@ -197,7 +178,17 @@ function startVoiceControl() {
 
 // ===== OTP Functions =====
 function generateOTP() {
-  const duration = parseInt(document.getElementById('otpDuration').value);
+  const hours = parseInt(document.getElementById('otpHours').value) || 0;
+  const minutes = parseInt(document.getElementById('otpMinutes').value) || 0;
+  const seconds = parseInt(document.getElementById('otpSeconds').value) || 0;
+  
+  const totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
+  
+  if (totalSeconds < 10) {
+    showNotification('Thời hạn OTP phải ít nhất 10 giây!', 'warning');
+    return;
+  }
+  
   const code = Math.floor(100000 + Math.random() * 900000).toString();
   
   // Display OTP
@@ -207,7 +198,7 @@ function generateOTP() {
   }
   
   // Start timer
-  otpEndTime = Date.now() + (duration * 60 * 1000);
+  otpEndTime = Date.now() + (totalSeconds * 1000);
   
   if (otpTimer) {
     clearInterval(otpTimer);
@@ -220,7 +211,7 @@ function generateOTP() {
   database.ref(DB_PATHS.commands + '/otp').set({
     code: code,
     expires: otpEndTime,
-    duration: duration
+    durationSeconds: totalSeconds
   }).then(() => {
     showNotification(`Đã tạo mã OTP: ${code}`, 'success');
   });
@@ -239,18 +230,47 @@ function updateOTPTimer() {
     return;
   }
   
-  const minutes = Math.floor(remaining / 60000);
+  const hours = Math.floor(remaining / 3600000);
+  const minutes = Math.floor((remaining % 3600000) / 60000);
   const seconds = Math.floor((remaining % 60000) / 1000);
-  timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  
+  if (hours > 0) {
+    timerEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  } else {
+    timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+}
+
+function deleteOTP() {
+  if (otpTimer) {
+    clearInterval(otpTimer);
+    otpTimer = null;
+  }
+  otpEndTime = null;
+  
+  const otpCodeEl = document.getElementById('otpCode');
+  const timerEl = document.getElementById('otpTimer');
+  
+  if (otpCodeEl) otpCodeEl.textContent = '------';
+  if (timerEl) timerEl.textContent = '--:--:--';
+  
+  // Remove from Firebase
+  database.ref(DB_PATHS.commands + '/otp').remove().then(() => {
+    showNotification('Đã xóa mã OTP!', 'success');
+  }).catch((error) => {
+    showNotification('Lỗi: ' + error.message, 'error');
+  });
 }
 
 // ===== WiFi Functions =====
+let currentWiFiPassword = '';  // Store current password for toggle
+
 function changeWiFi() {
-  const ssid = document.getElementById('wifiSSID').value;
+  const ssid = document.getElementById('selectedNetworkName').textContent;
   const password = document.getElementById('wifiPassword').value;
   
-  if (!ssid) {
-    showNotification('Vui lòng nhập tên mạng WiFi!', 'warning');
+  if (!ssid || ssid === '---') {
+    showNotification('Vui lòng chọn mạng WiFi!', 'warning');
     return;
   }
   
@@ -261,9 +281,111 @@ function changeWiFi() {
     timestamp: firebase.database.ServerValue.TIMESTAMP
   }).then(() => {
     showNotification('Đã gửi thông tin WiFi! ESP sẽ kết nối lại...', 'success');
+    cancelSelection();
   }).catch((error) => {
     showNotification('Lỗi: ' + error.message, 'error');
   });
+}
+
+function scanNetworks() {
+  const btnScan = document.getElementById('btnScan');
+  const networkList = document.getElementById('networkList');
+  const scanTitle = document.getElementById('scanTitle');
+  
+  if (btnScan) {
+    btnScan.disabled = true;
+    btnScan.innerHTML = '<span class="material-symbols-outlined spinning">sync</span> Đang quét...';
+  }
+  if (scanTitle) scanTitle.textContent = 'Đang quét...';
+  
+  // Mock scan (simulate 2s delay - replace with real ESP API call later)
+  setTimeout(() => {
+    const networks = [
+      { ssid: 'MyHome_WiFi', rssi: -50, secure: true },
+      { ssid: 'Guest_Network', rssi: -65, secure: true },
+      { ssid: 'IoT_Hub', rssi: -70, secure: true },
+      { ssid: 'Neighbor_WiFi', rssi: -85, secure: true },
+      { ssid: 'Free_WiFi', rssi: -90, secure: false }
+    ];
+    
+    renderNetworkList(networks);
+    
+    if (btnScan) {
+      btnScan.disabled = false;
+      btnScan.innerHTML = '<span class="material-symbols-outlined">wifi_find</span> Quét lại';
+    }
+    if (scanTitle) scanTitle.textContent = `Tìm thấy ${networks.length} mạng`;
+  }, 2000);
+}
+
+function renderNetworkList(networks) {
+  const listEl = document.getElementById('networkList');
+  if (!listEl) return;
+  
+  let html = '';
+  networks.forEach(net => {
+    const signalIcon = getSignalIcon(net.rssi);
+    const lockIcon = net.secure ? 'lock' : 'lock_open';
+    const lockClass = net.secure ? '' : 'open-network';
+    
+    html += `
+      <div class="network-item" onclick="selectNetwork('${net.ssid}')">
+        <div class="network-info">
+          <span class="material-symbols-outlined signal-icon">${signalIcon}</span>
+          <span class="network-ssid">${net.ssid}</span>
+        </div>
+        <span class="material-symbols-outlined lock-icon ${lockClass}">${lockIcon}</span>
+      </div>
+    `;
+  });
+  
+  listEl.innerHTML = html;
+}
+
+function getSignalIcon(rssi) {
+  if (rssi > -60) return 'signal_wifi_4_bar';
+  if (rssi > -70) return 'network_wifi_3_bar';
+  if (rssi > -80) return 'network_wifi_2_bar';
+  return 'network_wifi_1_bar';
+}
+
+function selectNetwork(ssid) {
+  const selectedName = document.getElementById('selectedNetworkName');
+  const connectForm = document.getElementById('connectForm');
+  const passwordInput = document.getElementById('wifiPassword');
+  
+  if (selectedName) selectedName.textContent = ssid;
+  if (connectForm) {
+    connectForm.style.display = 'block';
+    connectForm.classList.add('fade-in');
+  }
+  if (passwordInput) {
+    passwordInput.value = '';
+    passwordInput.focus();
+  }
+}
+
+function cancelSelection() {
+  const selectedName = document.getElementById('selectedNetworkName');
+  const connectForm = document.getElementById('connectForm');
+  
+  if (selectedName) selectedName.textContent = '---';
+  if (connectForm) connectForm.style.display = 'none';
+}
+
+function toggleCurrentPassword() {
+  const passwordEl = document.getElementById('currentPassword');
+  const iconEl = document.getElementById('togglePasswordIcon');
+  
+  if (passwordEl.classList.contains('password-masked')) {
+    passwordEl.classList.remove('password-masked');
+    passwordEl.textContent = currentWiFiPassword || '(không có)';
+    iconEl.textContent = 'visibility_off';
+  } else {
+    passwordEl.classList.add('password-masked');
+    passwordEl.textContent = '••••••••';
+    iconEl.textContent = 'visibility';
+  }
 }
 
 function togglePassword() {
