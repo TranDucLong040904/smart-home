@@ -232,6 +232,9 @@ void setup() {
   // WiFi Setup (non-blocking - keypad works while WiFi connects)
   setupWiFi();
 
+  // Firebase Setup (after WiFi is initialized)
+  setupFirebase();
+
   Serial.println("Setup complete!");
   Serial.println("Default password: 123456");
 }
@@ -240,6 +243,9 @@ void setup() {
 void loop() {
   // WiFi handler (non-blocking - runs independently of keypad)
   handleWiFi();
+
+  // Firebase handler (non-blocking - sync with cloud)
+  handleFirebase();
 
   // Khi bị khóa -> chỉ chạy đếm ngược
   if (locked) {

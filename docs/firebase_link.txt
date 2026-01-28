@@ -1,0 +1,27 @@
+
+DB URL: 
+https://smart-home-v1-0-24872-default-rtdb.asia-southeast1.firebasedatabase.app/
+
+
+
+
+API KEY 
+
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCE2hPgdymahEaPaOgF2ByxjJAhUPoUymw",
+  authDomain: "smart-home-v1-0-24872.firebaseapp.com",
+  databaseURL: "https://smart-home-v1-0-24872-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "smart-home-v1-0-24872",
+  storageBucket: "smart-home-v1-0-24872.firebasestorage.app",
+  messagingSenderId: "678270288027",
+  appId: "1:678270288027:web:49bd1ecfb51763e218463e"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
