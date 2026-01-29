@@ -209,7 +209,7 @@ function createLogItem(log) {
         </div>
         <span class="event-text">${eventText}</span>
       </div>
-      <div class="col-time">${dateStr}, ${timeStr}</div>
+      <div class="col-time">${dateTimeStr}</div>
       <div class="col-user">
         <div class="user-avatar ${userInfo.class}">${userInfo.initial}</div>
         <span class="user-name">${userInfo.name}</span>
