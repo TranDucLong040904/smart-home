@@ -25,22 +25,11 @@
 
 ### 2. WiFi Status Sync
 
-**Vấn đề:** Frontend hiển thị SSID, IP của ESP nhưng đang dùng mock data, chưa lấy từ ESP thực tế.
+**Trạng thái:** ✅ **Đã hoàn thành!** (2026-01-29)
 
-**Cần làm:**
-
-- [ ] Backend: Upload WiFi info lên Firebase (`/devices/wifi`)
-  ```
-  /devices/wifi/ssid: "TenMang"
-  /devices/wifi/ip: "192.168.1.100"
-  /devices/wifi/rssi: -65
-  ```
-- [ ] Frontend: Lắng nghe và hiển thị thông tin WiFi thực
-
-**File cần sửa:**
-
-- `backend/firebase_functions.ino` - thêm upload WiFi info
-- `frontend/js/app.js` - thêm listener cho WiFi status
+- Backend đã upload SSID/IP/RSSI lên Firebase.
+- Frontend đã hiển thị real-time thông tin WiFi.
+- Đã ẩn mật khẩu trên UI theo yêu cầu.
 
 ---
 
@@ -174,3 +163,6 @@ frontend/
 - [x] Reset WiFi từ Web Server local (2026-01-28)
 - [x] Tạo OTP từ Frontend (2026-01-28)
 - [x] Voice Control (2026-01-28)
+- [x] WiFi Status Sync (2026-01-29)
+- [x] Fix lỗi Indoor Button xung đột keypad (2026-01-29)
+- [x] UI Updates: Ẩn WiFi pass, chỉnh sửa branding (2026-01-29)

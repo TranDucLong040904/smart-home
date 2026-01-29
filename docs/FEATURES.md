@@ -153,7 +153,7 @@
 
 | Tính năng                 | Mô tả                                     |
 | ------------------------- | ----------------------------------------- |
-| ✅ Hiển thị mạng hiện tại | SSID, password (ẩn), IP                   |
+| ✅ Hiển thị mạng hiện tại | SSID, IP thực từ ESP (Update realtime)    |
 | ✅ Toggle password        | Hiển/ẩn mật khẩu                          |
 | ✅ Quét mạng              | Nút scan với animation                    |
 | ✅ Danh sách mạng         | Hiển thị SSID, signal strength, lock icon |
