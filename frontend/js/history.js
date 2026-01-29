@@ -13,6 +13,7 @@ const logsPerPage = 10;
 document.addEventListener('DOMContentLoaded', () => {
   initClock();
   initFirebaseListeners();
+  initDatePickers();
   populateDayFilter();
   setTodayAsDefault();
 });
@@ -29,13 +30,29 @@ function updateClock() {
   const dateEl = document.getElementById('clockDate');
   
   if (timeEl) {
-    timeEl.textContent = now.toLocaleTimeString('vi-VN');
+    timeEl.textContent = now.toLocaleTimeString('vi-VN', { hour12: false });
   }
   
   if (dateEl) {
     const options = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' };
     dateEl.textContent = now.toLocaleDateString('vi-VN', options);
   }
+}
+
+// ===== Date-Time Picker (Flatpickr) =====
+function initDatePickers() {
+  const opts = {
+    enableTime: true,
+    time_24hr: true,
+    dateFormat: 'Y-m-d H:i',
+    altInput: true,
+    altFormat: 'd/m/Y H:i',
+    allowInput: true
+  };
+  const startInput = document.getElementById('filterStart');
+  const endInput = document.getElementById('filterEnd');
+  if (startInput && window.flatpickr) flatpickr(startInput, opts);
+  if (endInput && window.flatpickr) flatpickr(endInput, opts);
 }
 
 // ===== Set Today as Default =====
@@ -119,6 +136,10 @@ function populateDayFilter() {
 // ===== Filter Today =====
 function filterToday() {
   setTodayAsDefault();
+  const startInput = document.getElementById('filterStart');
+  const endInput = document.getElementById('filterEnd');
+  if (startInput) startInput.value = '';
+  if (endInput) endInput.value = '';
   applyFilters();
 }
 
@@ -128,6 +149,10 @@ function clearFilters() {
   document.getElementById('filterMonth').value = '';
   document.getElementById('filterYear').value = '';
   document.getElementById('searchInput').value = '';
+  const startInput = document.getElementById('filterStart');
+  const endInput = document.getElementById('filterEnd');
+  if (startInput) startInput.value = '';
+  if (endInput) endInput.value = '';
   
   filteredLogs = [...allLogs];
   currentPage = 1;
@@ -164,8 +189,7 @@ function renderLogs() {
 
 function createLogItem(log) {
   const date = new Date(log.timestamp);
-  const dateStr = date.toLocaleDateString('vi-VN');
-  const timeStr = date.toLocaleTimeString('vi-VN');
+  const dateTimeStr = formatDateTimeVN(date);
   
   const iconClass = getEventIconClass(log.event);
   const iconSymbol = getEventIcon(log.event);
@@ -343,13 +367,24 @@ function applyFilters() {
   const month = document.getElementById('filterMonth').value;
   const year = document.getElementById('filterYear').value;
   const search = document.getElementById('searchInput').value.toLowerCase();
+  const startVal = document.getElementById('filterStart').value;
+  const endVal = document.getElementById('filterEnd').value;
+  const useRange = Boolean(startVal || endVal);
+  const startTime = parseDateValue(startVal);
+  const endTime = parseDateValue(endVal);
   
   filteredLogs = allLogs.filter(log => {
     const date = new Date(log.timestamp);
+    const ts = date.getTime();
     
-    if (day && date.getDate() !== parseInt(day)) return false;
-    if (month && (date.getMonth() + 1) !== parseInt(month)) return false;
-    if (year && date.getFullYear() !== parseInt(year)) return false;
+    if (useRange) {
+      if (startTime && ts < startTime) return false;
+      if (endTime && ts > endTime) return false;
+    } else {
+      if (day && date.getDate() !== parseInt(day)) return false;
+      if (month && (date.getMonth() + 1) !== parseInt(month)) return false;
+      if (year && date.getFullYear() !== parseInt(year)) return false;
+    }
     
     if (search) {
       const eventText = getEventText(log.event, log.message).toLowerCase();
@@ -383,6 +418,26 @@ function debounce(func, wait) {
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
   };
+}
+
+// ===== Date-Time Formatting =====
+function formatDateTimeVN(date) {
+  const weekdays = ['CN', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+  const wd = weekdays[date.getDay()];
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  const hh = String(date.getHours()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  const ss = String(date.getSeconds()).padStart(2, '0');
+  return `${wd} ${day}/${month}/${year}  ${hh}:${mm}:${ss}`;
+}
+
+function parseDateValue(val) {
+  if (!val) return null;
+  const normalized = val.includes('T') ? val : val.replace(' ', 'T');
+  const ts = Date.parse(normalized);
+  return Number.isNaN(ts) ? null : ts;
 }
 
 // ===== Select All =====

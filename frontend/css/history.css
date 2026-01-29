@@ -103,16 +103,49 @@
 
 /* ===== Filters ===== */
 .history-filters {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    gap: 16px;
+    display: grid;
+    gap: 14px;
     padding: 16px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     margin-bottom: 24px;
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+
+.filters-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filters-range {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.filters-date {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.filters-apply {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-filter {
+    width: 100%;
+    min-width: 140px;
+}
+
+@media (min-width: 768px) {
+    .btn-filter {
+        width: auto;
+    }
 }
 
 .filter-group {
