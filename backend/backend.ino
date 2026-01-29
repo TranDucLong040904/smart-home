@@ -664,6 +664,11 @@ void closeDoor() {
 
 /* ================= INDOOR BUTTON ================= */
 void handleIndoorButton() {
+  // BỎ QUA khi đang đổi mật khẩu (tránh xung đột với Keypad Column 0 - D0)
+  if (state == CHANGE_NEW || state == CHANGE_CONFIRM) {
+    return;
+  }
+
   int buttonState = digitalRead(INDOOR_BUTTON_PIN);
 
   // Edge detection: HIGH → LOW (nhấn nút)
