@@ -50,6 +50,22 @@
 
 ## 🟡 CHỨC NĂNG UI CÓ NHƯNG BACKEND CHƯA HỖ TRỢ
 
+### 0. Quản lý tài khoản (Admin/User)
+
+| UI                           | Backend                       |
+| ---------------------------- | ----------------------------- |
+| ✅ Bảng, nút thêm/sửa/xóa     | ❌ Chưa lưu Firebase          |
+| ✅ Hiển/ẩn mật khẩu demo      | ❌ Chưa Auth/Security Rules   |
+| ✅ Mock data hiển thị tức thì | ❌ Reload mất dữ liệu         |
+
+**Cần làm:**
+
+- [ ] Kết nối Firestore hoặc Realtime DB để lưu Admin/User
+- [ ] Thêm Auth (Email/Password hoặc Custom Token) và Security Rules cho CRUD
+- [ ] Lưu mật khẩu dạng hash (hoặc dùng Firebase Auth thay trường password thô)
+- [ ] Đồng bộ real-time để bảng cập nhật khi thay đổi
+- [ ] Xử lý error/loading, tránh mất dữ liệu khi offline
+
 ### 1. Thay đổi WiFi từ Frontend
 
 | UI                                      | Backend                 |

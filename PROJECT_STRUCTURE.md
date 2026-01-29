@@ -29,8 +29,21 @@ smart door/
 │   ├── config.h                  # Chân GPIO, hằng số
 │   └── README.md                 # Hướng dẫn nạp
 │
-└── frontend/                     # Web UI (chưa triển khai mã)
-    └── (trống)
+└── frontend/                     # Web UI
+    ├── index.html                # Trang Điều Khiển
+    ├── history.html              # Trang Lịch Sử
+    ├── admin.html                # Trang Tài khoản (UI demo)
+    ├── favicon.svg               # Favicon (SVG)
+    ├── favicon.png               # Favicon (PNG)
+    ├── css/
+    │   ├── styles.css            # Style chung + điều khiển
+    │   ├── history.css           # Style trang lịch sử
+    │   └── admin.css             # Style trang tài khoản
+    └── js/
+        ├── app.js                # Logic điều khiển cửa, WiFi, OTP
+        ├── history.js            # (Placeholder) logic lịch sử
+        ├── admin.js              # UI demo quản lý tài khoản (mock data)
+        └── firebase-config.js    # Cấu hình Firebase (frontend)
 ```
 
 ---
@@ -85,8 +98,7 @@ Hiện tại dùng một sketch chính `backend.ino` (đã có state machine, EE
 ---
 
 ### **4. `frontend/` - Web UI**
-
-Hiện chưa có mã nguồn. Sẽ dựng ở Phase 3 (dashboard trạng thái, log, OTP, cấu hình, mở từ xa). Khi bắt đầu, tạo `index.html`, `css/`, `js/`, `assets/`, `README.md` theo nhu cầu.
+Đã có giao diện điều khiển, lịch sử (UI), và trang quản lý tài khoản (UI demo, dữ liệu mock). Kết nối Firebase đang một phần: điều khiển cửa/OTP/WiFi dùng Firebase, còn trang tài khoản chưa lưu DB.
 
 ---
 
@@ -205,20 +217,23 @@ Hiện chưa có mã nguồn. Sẽ dựng ở Phase 3 (dashboard trạng thái, 
 ## 🎯 Trạng thái hiện tại
 
 **Version:** 0.1.1  
-**Phase:** 1 - Hardware + Firmware cục bộ  
-**Status:** Đã có firmware chính (backend.ino), tiếp tục hoàn thiện/test
+**Phase:** 3 - Frontend dashboard (UI đã dựng; một phần backend chưa nối)  
+**Status:** Firmware chính ổn định; frontend đã có Điều khiển/OTP/WiFi/UI tài khoản (mock)
 
 **Đã hoàn thành:**
 
 - ✅ Tài liệu dự án (SRS, plan, checklist)
 - ✅ Sơ đồ chân tối ưu
 - ✅ Firmware backend.ino: state machine, EEPROM, lockout, đổi MK, nút trong nhà
+- ✅ Frontend: Điều khiển cửa, OTP UI, WiFi status, toast notification, clock
+- ✅ Frontend: Trang tài khoản (UI demo, chưa lưu Firebase)
 
 **Tiếp theo:**
 
+- [ ] Kết nối Firebase cho tài khoản (CRUD + Auth/Rules)
+- [ ] Hoàn thiện trang lịch sử (đọc log từ Firebase)
 - [ ] Test thực tế keypad/LCD/servo/buzzer và ghi vào testing_log.md
 - [ ] Điều chỉnh cấu hình/giao diện LCD nếu cần
-- [ ] Chuẩn bị Phase 2: WiFiManager, NTP, OTA
 
 ---
 

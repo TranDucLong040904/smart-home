@@ -186,6 +186,14 @@
 | ✅ Realtime clock  | Cập nhật mỗi giây                 |
 | ✅ Format Việt Nam | Giờ:Phút:Giây, Thứ ngày/tháng/năm |
 
+### 9. Quản lý tài khoản (UI demo)
+
+| Tính năng                | Mô tả                                                            |
+| ------------------------ | ---------------------------------------------------------------- |
+| ✅ Bảng Admin/User (UI)  | Danh sách, thêm/sửa/xóa trên giao diện, show/hide mật khẩu demo  |
+| ⚠️ Lưu trữ tạm thời      | Dữ liệu mock trên client; reload trang sẽ quay lại dữ liệu mẫu   |
+| ⚠️ Chưa kết nối Firebase | Chưa đọc/ghi Firestore/Realtime DB, chưa áp dụng Auth/Rules      |
+
 ---
 
 ## 📊 Thống kê
