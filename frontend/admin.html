@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Home - Tài khoản</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/admin.css" />
+    <link rel="icon" type="image/png" href="favicon.png?v=2" sizes="256x256" />
+    <link rel="shortcut icon" href="favicon.png?v=2" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  </head>
+  <body>
+    <!-- Background Effects -->
+    <div class="bg-effects">
+      <div class="glow-1"></div>
+      <div class="glow-2"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="header glass-panel">
+      <div class="header-content">
+        <!-- Logo -->
+        <div class="logo">
+          <div class="logo-icon">
+            <span class="material-symbols-outlined">door_front</span>
+          </div>
+          <div class="logo-text">
+            <h1>Smart Home</h1>
+            <p>v1.0</p>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="nav">
+          <a href="index.html" class="nav-link">
+            <span class="material-symbols-outlined">sports_esports</span>
+            <span>Điều Khiển</span>
+          </a>
+          <a href="history.html" class="nav-link">
+            <span class="material-symbols-outlined">assignment</span>
+            <span>Lịch Sử</span>
+          </a>
+          <a href="admin.html" class="nav-link active">
+            <span class="material-symbols-outlined">shield_person</span>
+            <span>Tài khoản</span>
+          </a>
+        </nav>
+
+        <!-- Right Side -->
+        <div class="header-right">
+          <div class="clock">
+            <span class="clock-time" id="clockTime">--:--:--</span>
+            <span class="clock-date" id="clockDate">---</span>
+          </div>
+          <div class="status-badge">
+            <span class="status-dot"></span>
+            <span class="status-text" id="connectionStatus">
+              Đang kết nối...
+            </span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="account-grid">
+        <!-- Admin Section -->
+        <section class="account-card glass-panel">
+          <div class="card-header">
+            <div class="title-group">
+              <div class="icon admin">
+                <span class="material-symbols-outlined">shield_lock</span>
+              </div>
+              <div>
+                <p class="card-label">Quản lý Admin</p>
+                <h3 class="card-title">Tài khoản quản trị</h3>
+              </div>
+              <span class="badge admin">ADMIN</span>
+            </div>
+            <button class="btn-add-admin" onclick="openModal('admin')">
+              <span class="material-symbols-outlined">add_moderator</span>
+              <span>Thêm admin</span>
+            </button>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="account-table" id="adminTable">
+              <colgroup>
+                <col class="col-name" />
+                <col class="col-pass" />
+                <col class="col-date" />
+                <col class="col-actions" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Tên</th>
+                  <th class="hide-sm">Mật khẩu</th>
+                  <th class="hide-md">Ngày tạo</th>
+                  <th class="align-right">Hành động</th>
+                </tr>
+              </thead>
+              <tbody id="adminTableBody"></tbody>
+            </table>
+            <div class="empty" id="adminEmpty">
+              <span class="material-symbols-outlined">person_off</span>
+              <p>Chưa có admin nào</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- User Section -->
+        <section class="account-card glass-panel">
+          <div class="card-header">
+            <div class="title-group">
+              <div class="icon user">
+                <span class="material-symbols-outlined">group</span>
+              </div>
+              <div>
+                <p class="card-label">Quản lý User</p>
+                <h3 class="card-title">Tài khoản người dùng</h3>
+              </div>
+              <span class="badge user">USER</span>
+            </div>
+            <button class="btn-add-user" onclick="openModal('user')">
+              <span class="material-symbols-outlined">group_add</span>
+              <span>Thêm user</span>
+            </button>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="account-table" id="userTable">
+              <colgroup>
+                <col class="col-name" />
+                <col class="col-pass" />
+                <col class="col-date" />
+                <col class="col-actions" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Tên</th>
+                  <th class="hide-sm">Mật khẩu</th>
+                  <th class="hide-md">Ngày tạo</th>
+                  <th class="align-right">Hành động</th>
+                </tr>
+              </thead>
+              <tbody id="userTableBody"></tbody>
+            </table>
+            <div class="empty" id="userEmpty">
+              <span class="material-symbols-outlined">person_off</span>
+              <p>Chưa có user nào</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="bottom-nav">
+      <div class="nav-items">
+        <a href="index.html" class="nav-item">
+          <span class="material-symbols-outlined">sports_esports</span>
+          <span>Điều Khiển</span>
+        </a>
+        <a href="history.html" class="nav-item">
+          <span class="material-symbols-outlined">assignment</span>
+          <span>Lịch Sử</span>
+        </a>
+        <a href="admin.html" class="nav-item active">
+          <span class="material-symbols-outlined">shield_person</span>
+          <span>Tài khoản</span>
+        </a>
+      </div>
+    </nav>
+
+    <!-- Modal -->
+    <div class="modal" id="accountModal">
+      <div class="modal-content glass-panel">
+        <div class="modal-header">
+          <h3 id="modalTitle">Thêm tài khoản</h3>
+          <button class="btn-icon" onclick="closeModal()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <label class="form-label">Tên</label>
+          <input type="text" class="glass-input" id="accountName" placeholder="Nhập tên" />
+
+          <label class="form-label">Mật khẩu</label>
+          <input type="text" class="glass-input" id="accountPassword" placeholder="Nhập mật khẩu" />
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+          <button class="btn btn-open" id="modalSave">Lưu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- App Scripts -->
+    <script src="js/admin.js"></script>
+  </body>
+</html>

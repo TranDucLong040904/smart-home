@@ -7,6 +7,7 @@
     min-height: calc(100vh - 200px);
     display: flex;
     flex-direction: column;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22), 0 8px 22px rgba(0, 0, 0, 0.2);
 }
 
 /* ===== History Header ===== */
@@ -111,6 +112,7 @@
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.05);
     margin-bottom: 24px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
 }
 
 .filter-group {
@@ -191,6 +193,7 @@
     text-transform: uppercase;
     letter-spacing: 1px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.16);
 }
 
 .table-header .col-checkbox {
@@ -212,6 +215,7 @@
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-top: none;
     border-radius: 0 0 8px 8px;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.2);
 }
 
 /* ===== Log Item ===== */
