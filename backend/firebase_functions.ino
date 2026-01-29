@@ -12,7 +12,6 @@
 #include "firebase_config.h"
 #include <Firebase_ESP_Client.h>
 
-
 // Provide the RTDB payload printing info
 #include <addons/RTDBHelper.h>
 
@@ -88,6 +87,11 @@ void updateDeviceStatus() {
   Firebase.RTDB.setBool(&fbdo, path + "/locked", locked);
   Firebase.RTDB.setBool(&fbdo, path + "/online", true);
   Firebase.RTDB.setInt(&fbdo, path + "/lastUpdate", millis());
+
+  // Update WiFi status
+  Firebase.RTDB.setString(&fbdo, path + "/wifi/ssid", WiFi.SSID());
+  Firebase.RTDB.setString(&fbdo, path + "/wifi/ip", WiFi.localIP().toString());
+  Firebase.RTDB.setInt(&fbdo, path + "/wifi/rssi", WiFi.RSSI());
 }
 
 /* ================= CHECK CLOUD COMMANDS ================= */

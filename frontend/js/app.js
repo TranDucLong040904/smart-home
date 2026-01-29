@@ -46,6 +46,10 @@ function initFirebaseListeners() {
       updateDoorUI(data.door === 'open');
       updateConnectionStatus(data.online);
 
+      // Update WiFi status from ESP
+      if (data.wifi) {
+        updateWiFiStatus(data.wifi);
+      }
     }
   });
   
@@ -53,6 +57,25 @@ function initFirebaseListeners() {
   database.ref('.info/connected').on('value', (snapshot) => {
     updateConnectionStatus(snapshot.val());
   });
+}
+
+// ===== WiFi Status Update =====
+function updateWiFiStatus(wifi) {
+  const ssidEl = document.getElementById('currentSSID');
+  const ipEl = document.getElementById('currentIP');
+  
+  if (ssidEl && wifi.ssid) {
+    ssidEl.textContent = wifi.ssid;
+  }
+  
+  if (ipEl && wifi.ip) {
+    ipEl.textContent = wifi.ip;
+  }
+  
+  // Store password for toggle (if available)
+  if (wifi.ssid) {
+    currentWiFiPassword = '********'; // ESP không gửi password thực
+  }
 }
 
 // ===== Door Control =====
