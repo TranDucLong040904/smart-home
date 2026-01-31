@@ -41,18 +41,42 @@ function updateClock() {
 
 // ===== Date-Time Picker (Flatpickr) =====
 function initDatePickers() {
-  const opts = {
+  // Vietnamese locale for Flatpickr
+  const Vietnamese = {
+    weekdays: {
+      shorthand: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+      longhand: ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy']
+    },
+    months: {
+      shorthand: ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'],
+      longhand: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12']
+    },
+    firstDayOfWeek: 1,
+    rangeSeparator: ' đến ',
+    time_24hr: true
+  };
+
+  const baseOpts = {
     enableTime: true,
     time_24hr: true,
     dateFormat: 'Y-m-d H:i',
     altInput: true,
     altFormat: 'd/m/Y H:i',
-    allowInput: true
+    allowInput: true,
+    locale: Vietnamese
   };
+
   const startInput = document.getElementById('filterStart');
   const endInput = document.getElementById('filterEnd');
-  if (startInput && window.flatpickr) flatpickr(startInput, opts);
-  if (endInput && window.flatpickr) flatpickr(endInput, opts);
+
+  if (startInput && window.flatpickr) {
+    flatpickr(startInput, { ...baseOpts, placeholder: 'Chọn thời gian bắt đầu' });
+    startInput.placeholder = 'Chọn thời gian bắt đầu';
+  }
+  if (endInput && window.flatpickr) {
+    flatpickr(endInput, { ...baseOpts, placeholder: 'Chọn thời gian kết thúc' });
+    endInput.placeholder = 'Chọn thời gian kết thúc';
+  }
 }
 
 // ===== Set Today as Default =====
@@ -149,15 +173,29 @@ function clearFilters() {
   document.getElementById('filterMonth').value = '';
   document.getElementById('filterYear').value = '';
   document.getElementById('searchInput').value = '';
+  
+  // Clear Flatpickr instances properly
   const startInput = document.getElementById('filterStart');
   const endInput = document.getElementById('filterEnd');
-  if (startInput) startInput.value = '';
-  if (endInput) endInput.value = '';
+  
+  if (startInput && startInput._flatpickr) {
+    startInput._flatpickr.clear();
+  } else if (startInput) {
+    startInput.value = '';
+  }
+  
+  if (endInput && endInput._flatpickr) {
+    endInput._flatpickr.clear();
+  } else if (endInput) {
+    endInput.value = '';
+  }
   
   filteredLogs = [...allLogs];
   currentPage = 1;
   renderLogs();
 }
+
+
 
 // ===== Render Logs =====
 function renderLogs() {

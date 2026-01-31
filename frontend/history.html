@@ -20,7 +20,10 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="css/styles.css" />
     <link rel="stylesheet" href="css/history.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="icon" type="image/png" href="favicon.png?v=2" sizes="256x256" />
     <link rel="shortcut icon" href="favicon.png?v=2" />
@@ -107,9 +110,6 @@
             >
               <span class="material-symbols-outlined">delete</span>
             </button>
-            <button class="btn-icon" onclick="deleteAll()" title="Xóa tất cả">
-              <span class="material-symbols-outlined">delete_forever</span>
-            </button>
           </div>
         </div>
 
@@ -127,7 +127,11 @@
             >
               <span class="material-symbols-outlined">calendar_month</span>
             </button>
-            <button class="btn-icon" onclick="clearFilters()" title="Xem tất cả">
+            <button
+              class="btn-icon"
+              onclick="clearFilters()"
+              title="Xem tất cả"
+            >
               <span class="material-symbols-outlined">filter_alt_off</span>
             </button>
           </div>
@@ -135,11 +139,21 @@
           <div class="filters-range">
             <div class="filter-group">
               <label>Từ (Ngày & Giờ)</label>
-              <input type="datetime-local" class="glass-input" id="filterStart" />
+              <input
+                type="text"
+                class="glass-input"
+                id="filterStart"
+                placeholder="Chọn thời gian bắt đầu"
+              />
             </div>
             <div class="filter-group">
               <label>Đến (Ngày & Giờ)</label>
-              <input type="datetime-local" class="glass-input" id="filterEnd" />
+              <input
+                type="text"
+                class="glass-input"
+                id="filterEnd"
+                placeholder="Chọn thời gian kết thúc"
+              />
             </div>
           </div>
 
