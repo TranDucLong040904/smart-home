@@ -167,12 +167,40 @@ function startVoiceControl() {
       voiceStatus.textContent = `"${command}"`;
     }
     
-    if (command.includes('mở') || command.includes('open')) {
+    // Danh sách CỤM TỪ được chấp nhận (phải xuất hiện liền nhau)
+    const OPEN_PHRASES = [
+      // Tiếng Việt - cụm từ chính xác
+      'mở cửa', 'mở khóa nhà','mở khóa cửa', 'mở giúp cửa', 'mở cho tôi cái cửa', 'mở ra',
+      'cho vào', 'vào nhà',
+      // Tiếng Anh
+      'open door', 'open the door', 'unlock', 'let me in'
+    ];
+    
+    const CLOSE_PHRASES = [
+      // Tiếng Việt - cụm từ chính xác
+      'đóng cửa', 'khóa cửa', 'khóa lại', 'đóng lại', 'đóng đi',
+      'đóng giùm', 'đóng giúp',
+      // Tiếng Anh
+      'close door', 'close the door', 'lock', 'lock door', 'shut door'
+    ];
+    
+    // Kiểm tra cụm từ có trong câu nói không
+    const isOpenCommand = OPEN_PHRASES.some(phrase => command.includes(phrase));
+    const isCloseCommand = CLOSE_PHRASES.some(phrase => command.includes(phrase));
+    
+    if (isOpenCommand && !isCloseCommand) {
       openDoor();
-    } else if (command.includes('đóng') || command.includes('close')) {
+    } else if (isCloseCommand && !isOpenCommand) {
       closeDoor();
+    } else if (isOpenCommand && isCloseCommand) {
+      // Nếu có cả 2, ưu tiên cụm từ xuất hiện trước
+      const openIndex = Math.min(...OPEN_PHRASES.map(p => command.indexOf(p)).filter(i => i !== -1));
+      const closeIndex = Math.min(...CLOSE_PHRASES.map(p => command.indexOf(p)).filter(i => i !== -1));
+      
+      if (openIndex < closeIndex) openDoor();
+      else closeDoor();
     } else {
-      showNotification('Không nhận dạng được lệnh!', 'warning');
+      showNotification('Không nhận dạng! Hãy nói: "mở cửa" hoặc "đóng cửa"', 'warning');
     }
     
     setTimeout(() => {
