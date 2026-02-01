@@ -1,13 +1,13 @@
 // In-memory account lists for demo purposes
 const adminAccounts = [
-  { name: 'Admin_Main', password: 'admin123', createdAt: '12/10/2023' },
-  { name: 'Super_Admin', password: 'super456', createdAt: '01/01/2024' },
+  { name: 'Long', password: 'admin123', createdAt: '12/10/2023' },
+  { name: 'Phương', password: 'super456', createdAt: '01/01/2024' },
 ];
 
 const userAccounts = [
-  { name: 'Guest_LivingRoom', password: 'guest123', createdAt: '14/11/2023' },
-  { name: 'Kids_Tablet', password: 'kids789', createdAt: '20/12/2023' },
-  { name: 'Door_Access_01', password: 'door2468', createdAt: '05/01/2024' },
+  { name: 'A', password: 'guest123', createdAt: '14/11/2023' },
+  { name: 'B', password: 'kids789', createdAt: '20/12/2023' },
+  { name: 'C', password: 'door2468', createdAt: '05/01/2024' },
 ];
 
 let currentType = 'admin';

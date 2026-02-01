@@ -229,6 +229,7 @@ body {
   position: relative;
   width: 8px;
   height: 8px;
+  border-radius: 50%;
 }
 
 .status-dot::before {
@@ -1546,4 +1547,82 @@ body {
 /* Hide bottom nav by default (shown only on mobile) */
 .bottom-nav {
   display: none;
+}
+
+/* ===== Mobile Responsive Header ===== */
+@media (max-width: 768px) {
+
+  /* Header wraps on mobile */
+  .header-content {
+    padding: 8px 12px;
+    gap: 8px;
+    height: auto;
+    min-height: 60px;
+    flex-wrap: wrap;
+  }
+
+  /* Hide logo text on mobile */
+  .logo-text {
+    display: none;
+  }
+
+  /* Navigation takes full width row and scrolls horizontally */
+  .nav {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-link {
+    padding: 8px 12px;
+    font-size: 11px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .nav-link span:not(.material-symbols-outlined) {
+    font-size: 9px;
+  }
+
+  .nav-link .material-symbols-outlined {
+    font-size: 18px;
+  }
+
+  /* Clock adjustments */
+  .clock {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .clock-time {
+    font-size: 12px !important;
+  }
+
+  .clock-date {
+    font-size: 9px !important;
+  }
+
+  /* Status badge compact */
+  .status-badge {
+    padding: 4px 8px !important;
+  }
+
+  .status-text {
+    display: none;
+  }
+
+  .header-right {
+    gap: 8px;
+  }
 }

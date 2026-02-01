@@ -69,8 +69,15 @@
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
 }
 
-.icon.admin { background: linear-gradient(135deg, #f59e0b, #fbbf24); box-shadow: 0 10px 26px rgba(245, 158, 11, 0.35), 0 4px 10px rgba(0, 0, 0, 0.3); }
-.icon.user { background: linear-gradient(135deg, #3b82f6, #22d3ee); box-shadow: 0 10px 26px rgba(59, 130, 246, 0.3), 0 4px 10px rgba(0, 0, 0, 0.3); }
+.icon.admin {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  box-shadow: 0 10px 26px rgba(245, 158, 11, 0.35), 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.icon.user {
+  background: linear-gradient(135deg, #3b82f6, #22d3ee);
+  box-shadow: 0 10px 26px rgba(59, 130, 246, 0.3), 0 4px 10px rgba(0, 0, 0, 0.3);
+}
 
 .badge {
   padding: 4px 10px;
@@ -82,8 +89,17 @@
   letter-spacing: 0.5px;
 }
 
-.badge.admin { color: #f59e0b; background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.3); }
-.badge.user { color: #3b82f6; background: rgba(59, 130, 246, 0.12); border-color: rgba(59, 130, 246, 0.3); }
+.badge.admin {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.badge.user {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.3);
+}
 
 .table-wrapper {
   background: rgba(255, 255, 255, 0.02);
@@ -100,10 +116,21 @@
   table-layout: fixed;
 }
 
-.col-name { width: 32%; }
-.col-pass { width: 24%; }
-.col-date { width: 24%; }
-.col-actions { width: 20%; }
+.col-name {
+  width: 32%;
+}
+
+.col-pass {
+  width: 24%;
+}
+
+.col-date {
+  width: 24%;
+}
+
+.col-actions {
+  width: 20%;
+}
 
 .account-table thead {
   background: rgba(255, 255, 255, 0.03);
@@ -128,26 +155,216 @@
   background: rgba(255, 255, 255, 0.03);
 }
 
-.align-right { text-align: right; }
-.actions-cell { text-align: right; padding-right: 20px; }
-.account-table th.align-right { text-align: right; padding-right: 20px; }
+.align-right {
+  text-align: right;
+}
 
-.hide-sm { display: table-cell; }
-.hide-md { display: table-cell; }
+.actions-cell {
+  text-align: right;
+  padding-right: 20px;
+}
+
+.account-table th.align-right {
+  text-align: right;
+  padding-right: 20px;
+}
+
+.hide-sm {
+  display: table-cell;
+}
+
+.hide-md {
+  display: table-cell;
+}
 
 @media (max-width: 900px) {
-  .card-header { align-items: flex-start; flex-direction: column; }
-  .align-right { text-align: left; }
+  .card-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .align-right {
+    text-align: left;
+  }
 }
 
 @media (max-width: 720px) {
-  .hide-md { display: none; }
+
+  /* Keep all columns visible - allow horizontal scroll */
+  .hide-md {
+    display: table-cell;
+  }
+
+  .account-table {
+    min-width: 500px;
+  }
 }
 
 @media (max-width: 600px) {
-  .hide-sm { display: none; }
-  .breadcrumb { display: none; }
-  .page-header { flex-direction: column; align-items: flex-start; }
+
+  /* Portrait mode: hide date column, keep actions visible */
+  .hide-md {
+    display: none;
+  }
+
+  /* Keep password column visible */
+  .hide-sm {
+    display: table-cell;
+  }
+
+  .breadcrumb {
+    display: none;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Compact card */
+  .account-card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  /* Card header layout */
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .title-group {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .card-label {
+    font-size: 10px !important;
+  }
+
+  .card-title {
+    font-size: 14px !important;
+  }
+
+  .badge {
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+
+  /* Compact add buttons */
+  .btn-add-admin,
+  .btn-add-user {
+    padding: 8px 12px;
+    font-size: 12px;
+    gap: 6px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-add-admin .material-symbols-outlined,
+  .btn-add-user .material-symbols-outlined {
+    font-size: 18px;
+  }
+
+  /* Table with fixed column widths */
+  .table-wrapper {
+    overflow-x: hidden;
+  }
+
+  .account-table {
+    font-size: 12px;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .account-table th,
+  .account-table td {
+    padding: 8px 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Fixed column widths for portrait (3 columns: name, password, actions) */
+  .col-name {
+    width: 40%;
+  }
+
+  .col-pass {
+    width: 35%;
+  }
+
+  .col-date {
+    width: 0;
+    /* Hidden */
+  }
+
+  .col-actions {
+    width: 25%;
+  }
+
+  .table-cell-main {
+    gap: 6px;
+  }
+
+  .table-cell-text {
+    font-size: 11px;
+  }
+
+  .avatar {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+
+  /* Smaller action buttons */
+  .action-buttons {
+    gap: 3px;
+  }
+
+  .action-buttons .btn-icon {
+    width: 24px;
+    height: 24px;
+    padding: 3px;
+  }
+
+  .action-buttons .btn-icon .material-symbols-outlined {
+    font-size: 14px;
+  }
+
+  /* Keep align right for actions */
+  .actions-cell,
+  .account-table th.align-right {
+    text-align: right;
+    padding-right: 8px;
+  }
+
+  /* Icon size */
+  .icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .icon .material-symbols-outlined {
+    font-size: 16px;
+  }
+
+  /* Password cell */
+  .password-mask {
+    min-width: 60px;
+    font-size: 10px;
+  }
+
+  .btn-eye {
+    width: 22px;
+    height: 22px;
+  }
+
+  .btn-eye .material-symbols-outlined {
+    font-size: 14px;
+  }
 }
 
 .empty {
@@ -178,7 +395,10 @@
   padding: 6px;
 }
 
-.btn-icon:hover { background: rgba(255, 255, 255, 0.08); color: white; }
+.btn-icon:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+}
 
 /* Modal */
 .modal {
@@ -192,7 +412,9 @@
   z-index: 100;
 }
 
-.modal.show { display: flex; }
+.modal.show {
+  display: flex;
+}
 
 .modal-content {
   width: 100%;
@@ -239,10 +461,23 @@
   height: 28px;
 }
 
-.action-buttons .delete { color: #f87171; }
-.action-buttons .delete:hover { background: rgba(239, 68, 68, 0.15); color: #f87171; }
-.action-buttons .edit { color: #38bdf8; }
-.action-buttons .edit:hover { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+.action-buttons .delete {
+  color: #f87171;
+}
+
+.action-buttons .delete:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.action-buttons .edit {
+  color: #38bdf8;
+}
+
+.action-buttons .edit:hover {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+}
 
 .password-mask {
   letter-spacing: 2px;
@@ -307,7 +542,10 @@
   box-shadow: 0 14px 32px rgba(59, 130, 246, 0.38), 0 6px 16px rgba(0, 0, 0, 0.26);
 }
 
-.btn-eye:hover { background: rgba(255, 255, 255, 0.08); color: white; }
+.btn-eye:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+}
 
 .table-small-text {
   color: rgba(255, 255, 255, 0.55);
@@ -338,5 +576,10 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
-.avatar.admin { background: linear-gradient(135deg, #f59e0b, #fb923c); }
-.avatar.user { background: linear-gradient(135deg, #3b82f6, #22d3ee); }
+.avatar.admin {
+  background: linear-gradient(135deg, #f59e0b, #fb923c);
+}
+
+.avatar.user {
+  background: linear-gradient(135deg, #3b82f6, #22d3ee);
+}

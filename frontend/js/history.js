@@ -80,12 +80,12 @@ function initDatePickers() {
   const endInput = document.getElementById('filterEnd');
 
   if (startInput && window.flatpickr) {
-    flatpickr(startInput, { ...baseOpts, placeholder: 'Chọn thời gian bắt đầu' });
-    startInput.placeholder = 'Chọn thời gian bắt đầu';
+    const fp1 = flatpickr(startInput, baseOpts);
+    if (fp1.altInput) fp1.altInput.placeholder = 'Chọn thời gian bắt đầu';
   }
   if (endInput && window.flatpickr) {
-    flatpickr(endInput, { ...baseOpts, placeholder: 'Chọn thời gian kết thúc' });
-    endInput.placeholder = 'Chọn thời gian kết thúc';
+    const fp2 = flatpickr(endInput, baseOpts);
+    if (fp2.altInput) fp2.altInput.placeholder = 'Chọn thời gian kết thúc';
   }
 }
 

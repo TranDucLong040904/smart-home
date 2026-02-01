@@ -209,16 +209,18 @@
 
 ### 11. Trang Cài Đặt
 
-| Tính năng            | Mô tả                                    |
-| -------------------- | ---------------------------------------- |
-| ✅ Trang Settings    | Trang riêng cho cấu hình hệ thống        |
-| ✅ Cài đặt WiFi      | Chuyển từ trang Điều khiển sang Settings |
-| ✅ Dark mode toggle  | UI sẵn sàng (chức năng sắp có)           |
-| ✅ Thông tin user    | Hiển thị email đang đăng nhập            |
-| ✅ Đổi mật khẩu      | Form đổi MK với validation đầy đủ        |
-| ✅ Re-authentication | Xác thực lại trước khi đổi MK            |
-| ✅ Nút đăng xuất     | Logout khỏi Firebase Auth                |
-| ✅ Thông tin app     | Version, Developer, Year                 |
+| Tính năng            | Mô tả                                      |
+| -------------------- | ------------------------------------------ |
+| ✅ Trang Settings    | Trang riêng cho cấu hình hệ thống          |
+| ✅ Cài đặt WiFi      | Chuyển từ trang Điều khiển sang Settings   |
+| ✅ Dark/Light mode   | Toggle giao diện tối/sáng với localStorage |
+| ✅ Light theme       | Giao diện trắng - xanh da trời trẻ trung   |
+| ✅ Theme persistence | Lưu lựa chọn theme vào localStorage        |
+| ✅ Thông tin user    | Hiển thị email đang đăng nhập              |
+| ✅ Đổi mật khẩu      | Form đổi MK với validation đầy đủ          |
+| ✅ Re-authentication | Xác thực lại trước khi đổi MK              |
+| ✅ Nút đăng xuất     | Logout khỏi Firebase Auth                  |
+| ✅ Thông tin app     | Version, Developer, Year                   |
 
 ---
 
@@ -245,9 +247,9 @@
 | Phần mềm - Notification   | 5                 |
 | Phần mềm - Clock          | 2                 |
 | Phần mềm - Login & Auth   | 8                 |
-| Phần mềm - Settings Page  | 8                 |
-| **Tổng phần mềm**         | **54**            |
-| **TỔNG CỘNG**             | **106 tính năng** |
+| Phần mềm - Settings Page  | 10                |
+| **Tổng phần mềm**         | **56**            |
+| **TỔNG CỘNG**             | **108 tính năng** |
 
 ---
 
@@ -261,3 +263,5 @@
 | 2026-01-29 | Cập nhật đầy đủ 90 tính năng phần cứng + phần mềm                  |
 | 2026-02-02 | Thêm tính năng Đăng nhập & Bảo mật với Firebase Auth (8 tính năng) |
 | 2026-02-02 | Thêm trang Cài Đặt với WiFi, Dark mode UI, Logout, Đổi MK          |
+| 2026-02-02 | Hoàn thiện Light mode với theme trắng - xanh da trời               |
+| 2026-02-02 | Tinh chỉnh Date Picker light-mode (màu sáng + shadow)              |
