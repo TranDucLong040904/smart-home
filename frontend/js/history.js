@@ -11,11 +11,21 @@ const logsPerPage = 10;
 
 // ===== Initialize on DOM Load =====
 document.addEventListener('DOMContentLoaded', () => {
-  initClock();
-  initFirebaseListeners();
-  initDatePickers();
-  populateDayFilter();
-  setTodayAsDefault();
+  // Check authentication first
+  firebase.auth().onAuthStateChanged((user) => {
+    if (!user) {
+      // Not logged in, redirect to login page
+      window.location.href = 'login.html';
+      return;
+    }
+    
+    // User is authenticated, initialize app
+    initClock();
+    initFirebaseListeners();
+    initDatePickers();
+    populateDayFilter();
+    setTodayAsDefault();
+  });
 });
 
 // ===== Clock Functions =====

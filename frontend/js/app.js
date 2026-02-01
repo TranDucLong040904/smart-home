@@ -12,8 +12,18 @@ let otpEndTime = null;
 
 // ===== Initialize on DOM Load =====
 document.addEventListener('DOMContentLoaded', () => {
-  initClock();
-  initFirebaseListeners();
+  // Check authentication first
+  firebase.auth().onAuthStateChanged((user) => {
+    if (!user) {
+      // Not logged in, redirect to login page
+      window.location.href = 'login.html';
+      return;
+    }
+    
+    // User is authenticated, initialize app
+    initClock();
+    initFirebaseListeners();
+  });
 });
 
 // ===== Clock Functions =====
