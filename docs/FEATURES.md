@@ -188,38 +188,66 @@
 
 ### 9. Quản lý tài khoản (UI demo)
 
-| Tính năng                | Mô tả                                                            |
-| ------------------------ | ---------------------------------------------------------------- |
-| ✅ Bảng Admin/User (UI)  | Danh sách, thêm/sửa/xóa trên giao diện, show/hide mật khẩu demo  |
-| ⚠️ Lưu trữ tạm thời      | Dữ liệu mock trên client; reload trang sẽ quay lại dữ liệu mẫu   |
-| ⚠️ Chưa kết nối Firebase | Chưa đọc/ghi Firestore/Realtime DB, chưa áp dụng Auth/Rules      |
+| Tính năng                | Mô tả                                                           |
+| ------------------------ | --------------------------------------------------------------- |
+| ✅ Bảng Admin/User (UI)  | Danh sách, thêm/sửa/xóa trên giao diện, show/hide mật khẩu demo |
+| ⚠️ Lưu trữ tạm thời      | Dữ liệu mock trên client; reload trang sẽ quay lại dữ liệu mẫu  |
+| ⚠️ Chưa kết nối Firebase | Chưa đọc/ghi Firestore/Realtime DB, chưa áp dụng Auth/Rules     |
+
+### 10. Đăng nhập & Bảo mật (Firebase Auth)
+
+| Tính năng              | Mô tả                                            |
+| ---------------------- | ------------------------------------------------ |
+| ✅ Trang đăng nhập     | Giao diện glassmorphism đẹp, responsive          |
+| ✅ Firebase Auth       | Xác thực Email/Password                          |
+| ✅ Bảo vệ trang        | Redirect về login nếu chưa đăng nhập             |
+| ✅ Session persistence | Nhớ đăng nhập, không cần login lại mỗi lần vào   |
+| ✅ Show/hide password  | Toggle hiển thị mật khẩu                         |
+| ✅ Error handling      | Thông báo lỗi khi sai email/password             |
+| ✅ Loading state       | Hiển thị spinner khi đang đăng nhập              |
+| ✅ Security Rules      | Chỉ user đã đăng nhập mới truy cập được Firebase |
+
+### 11. Trang Cài Đặt
+
+| Tính năng            | Mô tả                                    |
+| -------------------- | ---------------------------------------- |
+| ✅ Trang Settings    | Trang riêng cho cấu hình hệ thống        |
+| ✅ Cài đặt WiFi      | Chuyển từ trang Điều khiển sang Settings |
+| ✅ Dark mode toggle  | UI sẵn sàng (chức năng sắp có)           |
+| ✅ Thông tin user    | Hiển thị email đang đăng nhập            |
+| ✅ Đổi mật khẩu      | Form đổi MK với validation đầy đủ        |
+| ✅ Re-authentication | Xác thực lại trước khi đổi MK            |
+| ✅ Nút đăng xuất     | Logout khỏi Firebase Auth                |
+| ✅ Thông tin app     | Version, Developer, Year                 |
 
 ---
 
 ## 📊 Thống kê
 
-| Hạng mục                  | Số tính năng     |
-| ------------------------- | ---------------- |
-| Phần cứng - Keypad        | 5                |
-| Phần cứng - EEPROM        | 8                |
-| Phần cứng - Servo         | 5                |
-| Phần cứng - Indoor Button | 4                |
-| Phần cứng - LCD           | 5                |
-| Phần cứng - Buzzer        | 7                |
-| Phần cứng - WiFi          | 7                |
-| Phần cứng - Web Server    | 5                |
-| Phần cứng - Firebase      | 6                |
-| **Tổng phần cứng**        | **52**           |
-| Phần mềm - UI             | 6                |
-| Phần mềm - Door Control   | 5                |
-| Phần mềm - Voice          | 5                |
-| Phần mềm - OTP            | 5                |
-| Phần mềm - WiFi UI        | 6                |
-| Phần mềm - Firebase       | 4                |
-| Phần mềm - Notification   | 5                |
-| Phần mềm - Clock          | 2                |
-| **Tổng phần mềm**         | **38**           |
-| **TỔNG CỘNG**             | **90 tính năng** |
+| Hạng mục                  | Số tính năng      |
+| ------------------------- | ----------------- |
+| Phần cứng - Keypad        | 5                 |
+| Phần cứng - EEPROM        | 8                 |
+| Phần cứng - Servo         | 5                 |
+| Phần cứng - Indoor Button | 4                 |
+| Phần cứng - LCD           | 5                 |
+| Phần cứng - Buzzer        | 7                 |
+| Phần cứng - WiFi          | 7                 |
+| Phần cứng - Web Server    | 5                 |
+| Phần cứng - Firebase      | 6                 |
+| **Tổng phần cứng**        | **52**            |
+| Phần mềm - UI             | 6                 |
+| Phần mềm - Door Control   | 5                 |
+| Phần mềm - Voice          | 5                 |
+| Phần mềm - OTP            | 5                 |
+| Phần mềm - WiFi UI        | 6                 |
+| Phần mềm - Firebase       | 4                 |
+| Phần mềm - Notification   | 5                 |
+| Phần mềm - Clock          | 2                 |
+| Phần mềm - Login & Auth   | 8                 |
+| Phần mềm - Settings Page  | 8                 |
+| **Tổng phần mềm**         | **54**            |
+| **TỔNG CỘNG**             | **106 tính năng** |
 
 ---
 
@@ -231,3 +259,5 @@
 | 2026-01-27 | Thêm WiFi Module non-blocking, Web Server local                    |
 | 2026-01-28 | Tích hợp Firebase Realtime Database, Reset WiFi                    |
 | 2026-01-29 | Cập nhật đầy đủ 90 tính năng phần cứng + phần mềm                  |
+| 2026-02-02 | Thêm tính năng Đăng nhập & Bảo mật với Firebase Auth (8 tính năng) |
+| 2026-02-02 | Thêm trang Cài Đặt với WiFi, Dark mode UI, Logout, Đổi MK          |

@@ -58,6 +58,10 @@
             <span class="material-symbols-outlined">shield_person</span>
             <span>Tài khoản</span>
           </a>
+          <a href="settings.html" class="nav-link">
+            <span class="material-symbols-outlined">settings</span>
+            <span>Cài Đặt</span>
+          </a>
         </nav>
 
         <!-- Right Side -->
@@ -155,8 +159,8 @@
         </section>
       </div>
 
-      <!-- Row 2: OTP + WiFi -->
-      <div class="grid grid-12">
+      <!-- Row 2: OTP -->
+      <div class="grid grid-12" style="justify-content: center">
         <!-- OTP Card -->
         <section class="glass-panel otp-card col-span-6">
           <div
@@ -254,75 +258,6 @@
             </div>
           </div>
         </section>
-
-        <!-- WiFi Card -->
-        <section class="glass-panel wifi-card col-span-6">
-          <h2
-            class="card-title"
-            style="
-              display: flex;
-              align-items: center;
-              gap: 8px;
-              margin-bottom: 16px;
-            "
-          >
-            <span class="material-symbols-outlined" style="color: #a855f7"
-              >wifi</span
-            >
-            Cài Đặt WiFi
-          </h2>
-
-          <div class="wifi-current">
-            <div class="dot"></div>
-            <div class="info">
-              <p>Mạng hiện tại: <strong id="currentSSID">---</strong></p>
-              <p>IP: <span id="currentIP">---</span></p>
-            </div>
-          </div>
-
-          <!-- Scan Networks -->
-          <button class="btn btn-scan" onclick="scanNetworks()" id="btnScan">
-            <span class="material-symbols-outlined">wifi_find</span>
-            Quét mạng có sẵn
-          </button>
-
-          <div class="wifi-networks">
-            <h4 id="scanTitle">Mạng có sẵn</h4>
-            <div class="network-list" id="networkList">
-              <p class="network-hint">Nhấn "Quét mạng có sẵn" để tìm kiếm...</p>
-            </div>
-          </div>
-
-          <!-- Password Input (Hidden until network selected) -->
-          <div id="connectForm" class="connect-form" style="display: none">
-            <div class="selected-network">
-              <span class="material-symbols-outlined">wifi</span>
-              <span id="selectedNetworkName">---</span>
-              <button class="btn-icon-cancel" onclick="cancelSelection()">
-                <span class="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            <div class="form-group">
-              <label>Mật khẩu mạng mới</label>
-              <div class="input-wrapper">
-                <span class="material-symbols-outlined icon">key</span>
-                <input
-                  type="password"
-                  class="glass-input"
-                  id="wifiPassword"
-                  placeholder="Nhập mật khẩu"
-                />
-                <button class="toggle-password" onclick="togglePassword()">
-                  <span class="material-symbols-outlined">visibility</span>
-                </button>
-              </div>
-            </div>
-            <button class="btn btn-purple" onclick="changeWiFi()">
-              <span class="material-symbols-outlined">router</span>
-              Kết nối
-            </button>
-          </div>
-        </section>
       </div>
     </main>
 
@@ -340,6 +275,10 @@
         <a href="admin.html" class="nav-item">
           <span class="material-symbols-outlined">shield_person</span>
           <span>Tài khoản</span>
+        </a>
+        <a href="settings.html" class="nav-item">
+          <span class="material-symbols-outlined">settings</span>
+          <span>Cài Đặt</span>
         </a>
       </div>
     </nav>

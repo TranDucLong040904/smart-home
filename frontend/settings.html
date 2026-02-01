@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Home - Cài Đặt</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/settings.css" />
+    <link rel="icon" type="image/png" href="favicon.png?v=2" sizes="256x256" />
+    <link rel="shortcut icon" href="favicon.png?v=2" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  </head>
+  <body>
+    <!-- Background Effects -->
+    <div class="bg-effects">
+      <div class="glow-1"></div>
+      <div class="glow-2"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="header glass-panel">
+      <div class="header-content">
+        <!-- Logo -->
+        <div class="logo">
+          <div class="logo-icon">
+            <span class="material-symbols-outlined">door_front</span>
+          </div>
+          <div class="logo-text">
+            <h1>Smart Home</h1>
+            <p>v1.0</p>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="nav">
+          <a href="index.html" class="nav-link">
+            <span class="material-symbols-outlined">sports_esports</span>
+            <span>Điều Khiển</span>
+          </a>
+          <a href="history.html" class="nav-link">
+            <span class="material-symbols-outlined">assignment</span>
+            <span>Lịch Sử</span>
+          </a>
+          <a href="admin.html" class="nav-link">
+            <span class="material-symbols-outlined">shield_person</span>
+            <span>Tài khoản</span>
+          </a>
+          <a href="settings.html" class="nav-link active">
+            <span class="material-symbols-outlined">settings</span>
+            <span>Cài Đặt</span>
+          </a>
+        </nav>
+
+        <!-- Right Side -->
+        <div class="header-right">
+          <div class="clock">
+            <span class="clock-time" id="clockTime">--:--:--</span>
+            <span class="clock-date" id="clockDate">---</span>
+          </div>
+          <div class="status-badge">
+            <span class="status-dot"></span>
+            <span class="status-text" id="connectionStatus"
+              >Đang kết nối...</span
+            >
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content settings-page">
+      <div class="settings-container">
+        <!-- Settings Grid -->
+        <div class="settings-grid">
+          <!-- Appearance Card -->
+          <section class="glass-panel settings-card appearance-card">
+            <div class="card-header-icon">
+              <span class="material-symbols-outlined">palette</span>
+            </div>
+            <h2 class="card-title">Giao Diện</h2>
+            <p class="card-description">Tùy chỉnh giao diện ứng dụng</p>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <span class="material-symbols-outlined setting-icon"
+                  >dark_mode</span
+                >
+                <div class="setting-text">
+                  <span class="setting-label">Chế độ tối</span>
+                  <span class="setting-hint"
+                    >Giảm mỏi mắt khi sử dụng buổi tối</span
+                  >
+                </div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="darkModeToggle" checked disabled />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <span class="material-symbols-outlined setting-icon"
+                  >light_mode</span
+                >
+                <div class="setting-text">
+                  <span class="setting-label">Chế độ sáng</span>
+                  <span class="setting-hint">Đang phát triển...</span>
+                </div>
+              </div>
+              <span class="badge badge-coming">Sắp có</span>
+            </div>
+          </section>
+
+          <!-- WiFi Card -->
+          <section class="glass-panel settings-card wifi-settings-card">
+            <div class="card-header-icon wifi-icon">
+              <span class="material-symbols-outlined">wifi</span>
+            </div>
+            <h2 class="card-title">Cài Đặt WiFi</h2>
+            <p class="card-description">Quản lý kết nối mạng cho thiết bị</p>
+
+            <div class="wifi-current">
+              <div class="dot"></div>
+              <div class="info">
+                <p>Mạng hiện tại: <strong id="currentSSID">---</strong></p>
+                <p>IP: <span id="currentIP">---</span></p>
+              </div>
+            </div>
+
+            <!-- Scan Networks -->
+            <button class="btn btn-scan" onclick="scanNetworks()" id="btnScan">
+              <span class="material-symbols-outlined">wifi_find</span>
+              Quét mạng có sẵn
+            </button>
+
+            <div class="wifi-networks">
+              <h4 id="scanTitle">Mạng có sẵn</h4>
+              <div class="network-list" id="networkList">
+                <p class="network-hint">
+                  Nhấn "Quét mạng có sẵn" để tìm kiếm...
+                </p>
+              </div>
+            </div>
+
+            <!-- Password Input (Hidden until network selected) -->
+            <div id="connectForm" class="connect-form" style="display: none">
+              <div class="selected-network">
+                <span class="material-symbols-outlined">wifi</span>
+                <span id="selectedNetworkName">---</span>
+                <button class="btn-icon-cancel" onclick="cancelSelection()">
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </div>
+              <div class="form-group">
+                <label>Mật khẩu mạng mới</label>
+                <div class="input-wrapper">
+                  <span class="material-symbols-outlined icon">key</span>
+                  <input
+                    type="password"
+                    class="glass-input"
+                    id="wifiPassword"
+                    placeholder="Nhập mật khẩu"
+                  />
+                  <button class="toggle-password" onclick="togglePassword()">
+                    <span class="material-symbols-outlined">visibility</span>
+                  </button>
+                </div>
+              </div>
+              <button class="btn btn-purple" onclick="changeWiFi()">
+                <span class="material-symbols-outlined">router</span>
+                Kết nối
+              </button>
+            </div>
+          </section>
+
+          <!-- Account Actions Card -->
+          <section class="glass-panel settings-card account-card">
+            <div class="card-header-icon account-icon">
+              <span class="material-symbols-outlined">account_circle</span>
+            </div>
+            <h2 class="card-title">Tài Khoản</h2>
+            <p class="card-description">Quản lý phiên đăng nhập</p>
+
+            <div class="user-info">
+              <div class="user-avatar">
+                <span class="material-symbols-outlined">person</span>
+              </div>
+              <div class="user-details">
+                <span class="user-email" id="userEmail">---</span>
+                <span class="user-status">Đã đăng nhập</span>
+              </div>
+            </div>
+
+            <!-- Change Password Section -->
+            <div class="change-password-section">
+              <button
+                class="btn btn-change-password"
+                id="btnShowChangePassword"
+                onclick="toggleChangePassword()"
+              >
+                <span class="material-symbols-outlined">key</span>
+                <span>Đổi Mật Khẩu</span>
+                <span class="material-symbols-outlined arrow-icon"
+                  >expand_more</span
+                >
+              </button>
+
+              <div
+                class="change-password-form"
+                id="changePasswordForm"
+                style="display: none"
+              >
+                <div class="form-group">
+                  <label class="form-label">Mật khẩu hiện tại</label>
+                  <div class="input-wrapper-settings">
+                    <span class="material-symbols-outlined">lock</span>
+                    <input
+                      type="password"
+                      class="glass-input"
+                      id="currentPassword"
+                      placeholder="Nhập mật khẩu hiện tại"
+                    />
+                    <button
+                      type="button"
+                      class="toggle-password-btn"
+                      onclick="
+                        togglePasswordVisibility('currentPassword', this)
+                      "
+                    >
+                      <span class="material-symbols-outlined">visibility</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Mật khẩu mới</label>
+                  <div class="input-wrapper-settings">
+                    <span class="material-symbols-outlined">key</span>
+                    <input
+                      type="password"
+                      class="glass-input"
+                      id="newPassword"
+                      placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)"
+                    />
+                    <button
+                      type="button"
+                      class="toggle-password-btn"
+                      onclick="togglePasswordVisibility('newPassword', this)"
+                    >
+                      <span class="material-symbols-outlined">visibility</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Xác nhận mật khẩu mới</label>
+                  <div class="input-wrapper-settings">
+                    <span class="material-symbols-outlined">key</span>
+                    <input
+                      type="password"
+                      class="glass-input"
+                      id="confirmPassword"
+                      placeholder="Nhập lại mật khẩu mới"
+                    />
+                    <button
+                      type="button"
+                      class="toggle-password-btn"
+                      onclick="
+                        togglePasswordVisibility('confirmPassword', this)
+                      "
+                    >
+                      <span class="material-symbols-outlined">visibility</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="password-actions">
+                  <button
+                    class="btn btn-cancel-password"
+                    onclick="cancelChangePassword()"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    class="btn btn-save-password"
+                    onclick="handleChangePassword()"
+                  >
+                    <span class="material-symbols-outlined">save</span>
+                    Lưu Mật Khẩu
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button
+              class="btn btn-logout"
+              id="logoutBtn"
+              onclick="handleLogout()"
+            >
+              <span class="material-symbols-outlined">logout</span>
+              <span>Đăng Xuất</span>
+            </button>
+          </section>
+
+          <!-- App Info Card -->
+          <section class="glass-panel settings-card info-card">
+            <div class="card-header-icon info-icon">
+              <span class="material-symbols-outlined">info</span>
+            </div>
+            <h2 class="card-title">Thông Tin Ứng Dụng</h2>
+            <p class="card-description">Chi tiết về phiên bản</p>
+
+            <div class="info-list">
+              <div class="info-item">
+                <span class="info-label">Phiên bản</span>
+                <span class="info-value">1.0</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Phát triển bởi</span>
+                <span class="info-value">Tran Duc Long</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Năm</span>
+                <span class="info-value">2026</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="bottom-nav">
+      <div class="nav-items">
+        <a href="index.html" class="nav-item">
+          <span class="material-symbols-outlined">sports_esports</span>
+          <span>Điều Khiển</span>
+        </a>
+        <a href="history.html" class="nav-item">
+          <span class="material-symbols-outlined">assignment</span>
+          <span>Lịch Sử</span>
+        </a>
+        <a href="admin.html" class="nav-item">
+          <span class="material-symbols-outlined">shield_person</span>
+          <span>Tài khoản</span>
+        </a>
+        <a href="settings.html" class="nav-item active">
+          <span class="material-symbols-outlined">settings</span>
+          <span>Cài Đặt</span>
+        </a>
+      </div>
+    </nav>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Smart Home v1.0 - Developed by Duc Long</p>
+    </footer>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <!-- App Scripts -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/settings.js"></script>
+  </body>
+</html>
