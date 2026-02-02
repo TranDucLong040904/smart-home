@@ -16,7 +16,7 @@ function initTheme() {
   
   // Update toggle switch if exists
   const darkModeToggle = document.getElementById('darkModeToggle');
-  const lightModeItem = document.getElementById('lightModeItem');
+  const lightModeToggle = document.getElementById('lightModeToggle');
   
   if (darkModeToggle) {
     darkModeToggle.checked = savedTheme === THEME_DARK;
@@ -24,8 +24,10 @@ function initTheme() {
     darkModeToggle.addEventListener('change', handleDarkModeToggle);
   }
   
-  if (lightModeItem) {
-    lightModeItem.addEventListener('click', () => setTheme(THEME_LIGHT));
+  if (lightModeToggle) {
+    lightModeToggle.checked = savedTheme === THEME_LIGHT;
+    lightModeToggle.disabled = false;
+    lightModeToggle.addEventListener('change', handleLightModeToggle);
   }
 }
 
@@ -45,8 +47,12 @@ function setTheme(theme) {
   
   // Update toggle switches
   const darkModeToggle = document.getElementById('darkModeToggle');
+  const lightModeToggle = document.getElementById('lightModeToggle');
   if (darkModeToggle) {
     darkModeToggle.checked = theme === THEME_DARK;
+  }
+  if (lightModeToggle) {
+    lightModeToggle.checked = theme === THEME_LIGHT;
   }
   
   // Show notification
@@ -67,6 +73,12 @@ function toggleTheme() {
 function handleDarkModeToggle(e) {
   const isDarkMode = e.target.checked;
   setTheme(isDarkMode ? THEME_DARK : THEME_LIGHT);
+}
+
+// ===== Handle Light Mode Toggle =====
+function handleLightModeToggle(e) {
+  const isLightMode = e.target.checked;
+  setTheme(isLightMode ? THEME_LIGHT : THEME_DARK);
 }
 
 // ===== Get Current Theme =====

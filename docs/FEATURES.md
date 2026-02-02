@@ -214,7 +214,7 @@
 | ✅ Trang Settings    | Trang riêng cho cấu hình hệ thống          |
 | ✅ Cài đặt WiFi      | Chuyển từ trang Điều khiển sang Settings   |
 | ✅ Dark/Light mode   | Toggle giao diện tối/sáng với localStorage |
-| ✅ Light theme       | Giao diện trắng - xanh da trời trẻ trung   |
+| ✅ Light theme       | Giao diện trẻ trung, bắt mắt   |
 | ✅ Theme persistence | Lưu lựa chọn theme vào localStorage        |
 | ✅ Thông tin user    | Hiển thị email đang đăng nhập              |
 | ✅ Đổi mật khẩu      | Form đổi MK với validation đầy đủ          |

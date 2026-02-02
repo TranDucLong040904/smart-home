@@ -1377,12 +1377,24 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    appearance: none;
+    -webkit-appearance: none;
+    outline-offset: 0;
+    -webkit-tap-highlight-color: transparent;
 }
 
 [data-theme="light"] .btn-calendar:hover {
     background: linear-gradient(135deg, #0c4a6e 0%, #0369a1 100%) !important;
     box-shadow: 0 8px 25px rgba(3, 105, 161, 0.45) !important;
     transform: translateY(-2px) !important;
+}
+
+[data-theme="light"] .btn-calendar:focus,
+[data-theme="light"] .btn-calendar:focus-visible,
+[data-theme="light"] .btn-calendar:active {
+    outline: none !important;
+    box-shadow: 0 6px 20px rgba(3, 105, 161, 0.35) !important;
+    border-color: transparent !important;
 }
 
 [data-theme="light"] .btn-calendar .material-symbols-outlined {
@@ -1392,7 +1404,7 @@
 
 /* Filter Button - Orange gradient, same size as calendar */
 [data-theme="light"] .filters-actions .btn-icon:not(.btn-calendar) {
-    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%) !important;
+    background: linear-gradient(135deg, #8328e296  0%, #fbbf24 100%) !important;
     border: none !important;
     outline: none !important;
     color: white !important;
@@ -1403,17 +1415,45 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    appearance: none;
+    -webkit-appearance: none;
+    outline-offset: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Remove inner focus ring for Firefox */
+[data-theme="light"] .btn-calendar::-moz-focus-inner,
+[data-theme="light"] .filters-actions .btn-icon:not(.btn-calendar)::-moz-focus-inner {
+    border: 0 !important;
+    padding: 0 !important;
 }
 
 [data-theme="light"] .filters-actions .btn-icon:not(.btn-calendar):hover {
-    background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%) !important;
+    background: linear-gradient(135deg, #ff7ee3f0  0%, #f59e0b 100%) !important;
     box-shadow: 0 8px 25px rgba(245, 158, 11, 0.45) !important;
     transform: translateY(-2px) !important;
+}
+
+[data-theme="light"] .filters-actions .btn-icon:not(.btn-calendar):focus,
+[data-theme="light"] .filters-actions .btn-icon:not(.btn-calendar):focus-visible,
+[data-theme="light"] .filters-actions .btn-icon:not(.btn-calendar):active {
+    outline: none !important;
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35) !important;
+    border: none !important;
+}
+
+[data-theme="light"] .filters-actions .btn-icon:not(.btn-calendar):focus,
+[data-theme="light"] .filters-actions .btn-icon:not(.btn-calendar):focus-visible,
+[data-theme="light"] .filters-actions .btn-icon:not(.btn-calendar):active {
+    outline: none !important;
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35) !important;
+    border-color: transparent !important;
 }
 
 [data-theme="light"] .filters-actions .btn-icon:not(.btn-calendar) .material-symbols-outlined {
     color: white !important;
     font-size: 22px !important;
+    font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
 }
 
 /* Delete Button (History page trash) - Darker red with shadow */
