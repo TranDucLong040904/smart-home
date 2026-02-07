@@ -79,6 +79,8 @@
                 <span class="material-symbols-outlined">visibility</span>
               </button>
             </div>
+            <!-- Forgot Password Link -->
+            <a href="#" id="forgotLink" class="forgot-link">Quên mật khẩu?</a>
           </div>
 
           <!-- Error Message -->
@@ -106,6 +108,30 @@
 
       <!-- Copyright -->
       <p class="copyright">© 2026 Smart Home Control System</p>
+    </div>
+
+    <!-- Forgot Password Modal (Lightweight) -->
+    <div class="forgot-modal" id="forgotModal">
+      <div class="forgot-box glass-panel">
+        <h3>
+          <span class="material-symbols-outlined">lock_reset</span> Quên mật
+          khẩu
+        </h3>
+        <p>Nhập email để nhận liên kết đặt lại mật khẩu</p>
+        <input
+          type="email"
+          id="forgotEmail"
+          class="form-input"
+          placeholder="Email của bạn"
+        />
+        <div id="forgotMsg" class="forgot-msg hidden"></div>
+        <div class="forgot-btns">
+          <button type="button" id="forgotCancel" class="btn-cancel">
+            Hủy
+          </button>
+          <button type="button" id="forgotSend" class="btn-send">Gửi</button>
+        </div>
+      </div>
     </div>
 
     <!-- Firebase SDK -->

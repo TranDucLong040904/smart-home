@@ -755,3 +755,197 @@ body {
   background: #0ea5e9;
   color: white;
 }
+
+/* ===== Forgot Password ===== */
+.forgot-link {
+  display: block;
+  text-align: right;
+  margin-top: 8px;
+  color: var(--primary);
+  font-size: 13px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.forgot-link:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.forgot-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.forgot-modal.show {
+  display: flex;
+}
+
+.forgot-box {
+  width: 100%;
+  max-width: 360px;
+  padding: 24px;
+  border-radius: 16px;
+  animation: popIn 0.2s ease-out;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.forgot-box h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+
+.forgot-box h3 .material-symbols-outlined {
+  color: var(--primary);
+  font-size: 22px;
+}
+
+.forgot-box p {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin: 0 0 16px;
+}
+
+.forgot-box .form-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: var(--text-white);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.forgot-box .form-input:focus {
+  border-color: var(--primary);
+}
+
+.forgot-msg {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.forgot-msg.hidden {
+  display: none;
+}
+
+.forgot-msg.ok {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.forgot-msg.err {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.forgot-btns {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.forgot-btns button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-muted);
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-white);
+}
+
+.btn-send {
+  background: var(--primary);
+  border: none;
+  color: white;
+}
+
+.btn-send:hover {
+  background: var(--primary-hover);
+}
+
+.btn-send:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Light theme */
+[data-theme="light"] .forgot-link {
+  color: #0ea5e9;
+}
+
+[data-theme="light"] .forgot-box {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+[data-theme="light"] .forgot-box h3 {
+  color: #0f172a;
+}
+
+[data-theme="light"] .forgot-box p {
+  color: #64748b;
+}
+
+[data-theme="light"] .forgot-box .form-input {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #0f172a;
+}
+
+[data-theme="light"] .btn-cancel {
+  border-color: #e2e8f0;
+  color: #64748b;
+}
+
+[data-theme="light"] .btn-cancel:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+[data-theme="light"] .btn-send {
+  background: #0ea5e9;
+}
+
+[data-theme="light"] .btn-send:hover {
+  background: #0284c7;
+}

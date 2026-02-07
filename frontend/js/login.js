@@ -121,3 +121,61 @@ function setLoading(loading) {
 // Clear error on input
 emailInput.addEventListener('input', hideError);
 passwordInput.addEventListener('input', hideError);
+
+/* ===== Forgot Password (Optimized) ===== */
+(function() {
+  const modal = document.getElementById('forgotModal');
+  const link = document.getElementById('forgotLink');
+  const emailIn = document.getElementById('forgotEmail');
+  const msg = document.getElementById('forgotMsg');
+  const btnCancel = document.getElementById('forgotCancel');
+  const btnSend = document.getElementById('forgotSend');
+  
+  if (!modal || !link) return;
+
+  // Open modal
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    emailIn.value = emailInput.value || '';
+    msg.className = 'forgot-msg hidden';
+    modal.classList.add('show');
+    emailIn.focus();
+  });
+
+  // Close modal
+  const close = () => modal.classList.remove('show');
+  btnCancel.addEventListener('click', close);
+  modal.addEventListener('click', e => { if (e.target === modal) close(); });
+
+  // Send reset email
+  btnSend.addEventListener('click', async () => {
+    const email = emailIn.value.trim();
+    if (!email) {
+      showMsg('err', 'Vui lòng nhập email');
+      return;
+    }
+    
+    btnSend.disabled = true;
+    btnSend.textContent = 'Đang gửi...';
+    msg.className = 'forgot-msg hidden';
+
+    try {
+      await firebase.auth().sendPasswordResetEmail(email);
+      showMsg('ok', '✓ Đã gửi! Kiểm tra hộp thư (cả Spam) trong vài phút.');
+      emailIn.value = '';
+    } catch (err) {
+      const m = err.code === 'auth/user-not-found' ? 'Email không tồn tại trong hệ thống'
+              : err.code === 'auth/invalid-email' ? 'Email không hợp lệ'
+              : 'Lỗi, vui lòng thử lại';
+      showMsg('err', m);
+    } finally {
+      btnSend.disabled = false;
+      btnSend.textContent = 'Gửi';
+    }
+  });
+
+  function showMsg(type, text) {
+    msg.className = 'forgot-msg ' + type;
+    msg.textContent = text;
+  }
+})();
