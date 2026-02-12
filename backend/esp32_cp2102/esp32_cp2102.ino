@@ -29,7 +29,7 @@
 
 /* ================= SERVO ================= */
 #define SERVO_CLOSE_ANGLE 0
-#define SERVO_OPEN_ANGLE 180
+#define SERVO_OPEN_ANGLE 90
 Servo doorServo;
 bool doorOpen = false;
 

@@ -1,6 +1,6 @@
 {
   "devices": {
-    "esp8266_01": {
+    "esp32_cp2102": {
       "door": "closed",
       "locked": false,
       "lastUpdate": 0,
@@ -8,13 +8,13 @@
     }
   },
   "commands": {
-    "esp8266_01": {
+    "esp32_cp2102": {
       "action": "none",
       "timestamp": 0
     }
   },
   "config": {
-    "esp8266_01": {
+    "esp32_cp2102": {
       "maxFailAttempts": 3,
       "lockoutTime": 10,
       "doorOpenTime": 5

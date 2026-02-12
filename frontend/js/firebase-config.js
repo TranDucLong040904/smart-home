@@ -21,7 +21,7 @@ firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
 // Device ID
-const DEVICE_ID = "esp8266_01";
+const DEVICE_ID = "esp32_cp2102";
 
 // Database paths
 const DB_PATHS = {
