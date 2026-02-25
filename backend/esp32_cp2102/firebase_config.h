@@ -18,7 +18,8 @@
 #define FIREBASE_DATABASE_SECRET "XekO6Q7jVtsG8pwm4L2hJCcnl7sgbSqUR0XJc3lC"
 
 // Device ID (dùng để phân biệt các thiết bị khác nhau)
-#define DEVICE_ID "online"
+// Khớp với frontend và schema: esp32_cp2102
+#define DEVICE_ID "esp32_cp2102"
 
 // Firebase paths
 #define FB_PATH_DEVICES "/devices/" DEVICE_ID
