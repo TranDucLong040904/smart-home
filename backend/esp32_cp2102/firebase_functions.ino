@@ -107,6 +107,7 @@ void checkCloudCommand() {
     if (command == "open" && !doorOpen && !locked) {
       Serial.println(">>> FIREBASE: Open Door <<<");
       openDoor();
+      scheduleAutoCloseRemote();
       // Clear command after execution
       Firebase.RTDB.setString(&fbdo, String(FB_PATH_COMMANDS) + "/action",
                               "none");

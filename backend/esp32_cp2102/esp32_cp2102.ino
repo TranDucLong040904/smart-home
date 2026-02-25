@@ -98,6 +98,32 @@ void beep(int t = 80) {
   digitalWrite(BUZZER_PIN, LOW);
 }
 
+/* ================= AUTO CLOSE (REMOTE) ================= */
+#define AUTO_CLOSE_REMOTE_MS 10000UL // 10s cho lệnh mở từ web
+bool autoClosePending = false;
+unsigned long autoCloseDeadline = 0;
+
+void scheduleAutoCloseRemote() {
+  autoClosePending = true;
+  autoCloseDeadline = millis() + AUTO_CLOSE_REMOTE_MS;
+}
+
+void cancelAutoCloseRemote() { autoClosePending = false; }
+
+void handleAutoCloseRemote() {
+  if (!autoClosePending)
+    return;
+  if (!doorOpen) {
+    autoClosePending = false;
+    return;
+  }
+  if ((long)(millis() - autoCloseDeadline) >= 0) {
+    Serial.println("Auto-close (remote) after timeout");
+    closeDoor();
+    autoClosePending = false;
+  }
+}
+
 void beepKey() { beep(30); }
 
 void beepSuccess() {
@@ -209,6 +235,9 @@ void loop() {
 
   // Firebase handler (non-blocking - sync with cloud)
   handleFirebase();
+
+  // Auto-close chỉ áp dụng cho lệnh mở từ web
+  handleAutoCloseRemote();
 
   // Khi bị khóa -> chỉ chạy đếm ngược
   if (locked) {
@@ -615,6 +644,7 @@ void closeDoor() {
   delay(500);
   doorServo.detach(); // Detach để tránh PWM gây nhiễu buzzer
   doorOpen = false;
+  cancelAutoCloseRemote();
 
   beep(100);
   Serial.println("Door CLOSED");

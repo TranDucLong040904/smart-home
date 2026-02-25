@@ -86,8 +86,11 @@
       <!-- Row 1: Door Control + Voice -->
       <div class="grid grid-12" style="margin-bottom: 24px">
         <!-- Door Control Card -->
-        <section class="glass-panel door-control-card col-span-8">
-          <span class="material-symbols-outlined bg-icon">lock</span>
+        <section class="glass-panel door-control-card col-span-8" style="position: relative;">
+          <div id="autoCloseBadge" style="display:none; position:absolute; top:12px; right:12px; padding:6px 10px; border-radius:12px; background:rgba(234,179,8,0.15); color:#eab308; font-weight:600; font-size:12px; border:1px solid rgba(234,179,8,0.35);">
+            <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle;">timer</span>
+            <span id="autoCloseCountdown">10s</span>
+          </div>
 
           <div class="card-header">
             <p class="card-label">Điều Khiển Chính</p>

@@ -8,6 +8,10 @@ let doorStatus = 'closed';
 let isConnected = false;
 let otpTimer = null;
 let otpEndTime = null;
+const AUTO_CLOSE_REMOTE_MS = 10000;
+let autoCloseTimer = null;
+let autoCloseEndTime = null;
+let webOpenRequestedAt = null;
 
 
 // ===== Initialize on DOM Load =====
@@ -91,6 +95,9 @@ function updateWiFiStatus(wifi) {
 // ===== Door Control =====
 function openDoor() {
   console.log('Opening door...');
+  // Mark that the next open state likely comes from this web action
+  webOpenRequestedAt = Date.now();
+  stopAutoCloseCountdown();
   database.ref(DB_PATHS.commands).update({
     action: 'open',
     timestamp: firebase.database.ServerValue.TIMESTAMP
@@ -103,6 +110,7 @@ function openDoor() {
 
 function closeDoor() {
   console.log('Closing door...');
+  stopAutoCloseCountdown();
   database.ref(DB_PATHS.commands).update({
     action: 'close',
     timestamp: firebase.database.ServerValue.TIMESTAMP
@@ -115,6 +123,7 @@ function closeDoor() {
 
 // ===== UI Updates =====
 function updateDoorUI(isOpen) {
+  const wasOpen = doorStatus === 'open';
   doorStatus = isOpen ? 'open' : 'closed';
   
   const doorIcon = document.getElementById('doorIcon');
@@ -133,6 +142,16 @@ function updateDoorUI(isOpen) {
   if (doorStatusText) {
     doorStatusText.textContent = isOpen ? 'MỞ' : 'ĐÓNG';
     doorStatusText.className = isOpen ? 'status-open' : 'status-closed';
+  }
+
+  // Start countdown only when the door opens right after a web request
+  if (isOpen && !wasOpen && webOpenRequestedAt && (Date.now() - webOpenRequestedAt) < 5000) {
+    startAutoCloseCountdown();
+    webOpenRequestedAt = null;
+  }
+
+  if (!isOpen) {
+    stopAutoCloseCountdown();
   }
 }
 
@@ -531,3 +550,44 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+// ===== Auto-Close Countdown =====
+function startAutoCloseCountdown() {
+  const badge = document.getElementById('autoCloseBadge');
+  const countdownEl = document.getElementById('autoCloseCountdown');
+  if (!badge || !countdownEl) return;
+
+  autoCloseEndTime = Date.now() + AUTO_CLOSE_REMOTE_MS;
+  badge.style.display = 'inline-flex';
+  updateAutoCloseCountdown();
+
+  if (autoCloseTimer) clearInterval(autoCloseTimer);
+  autoCloseTimer = setInterval(() => {
+    if (!updateAutoCloseCountdown()) {
+      stopAutoCloseCountdown();
+    }
+  }, 250);
+}
+
+function stopAutoCloseCountdown() {
+  const badge = document.getElementById('autoCloseBadge');
+  if (autoCloseTimer) {
+    clearInterval(autoCloseTimer);
+    autoCloseTimer = null;
+  }
+  autoCloseEndTime = null;
+  if (badge) {
+    badge.style.display = 'none';
+  }
+}
+
+function updateAutoCloseCountdown() {
+  const countdownEl = document.getElementById('autoCloseCountdown');
+  if (!countdownEl || !autoCloseEndTime) return false;
+
+  const remainingMs = Math.max(0, autoCloseEndTime - Date.now());
+  const remainingSeconds = Math.ceil(remainingMs / 1000);
+  countdownEl.textContent = `${remainingSeconds}s`;
+
+  return remainingMs > 0;
+}
