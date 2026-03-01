@@ -290,8 +290,12 @@ function generateOTP() {
   // Save to Firebase
   database.ref(DB_PATHS.commands + '/otp').set({
     code: code,
-    expires: otpEndTime,
-    durationSeconds: totalSeconds
+    expires: otpEndTime,            // epoch ms (client clock)
+    expireAt: otpEndTime,           // duplicate for compatibility
+    durationSeconds: totalSeconds,
+    timestamp: firebase.database.ServerValue.TIMESTAMP, // server time for backend fallback
+    used: false,
+    status: 'active'
   }).then(() => {
     showNotification(`Đã tạo mã OTP: ${code}`, 'success');
   });

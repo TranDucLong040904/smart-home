@@ -1,24 +1,3 @@
-Bây giờ bạn code cho tôi những thứ sau 
-- wifi manager
-- web server đơn giản để test các chức năng
-    + Đóng - mở cửa
-    + Tạo 1 wifi ảo để kết nối vào cấu hình wifi
-    + Reset wifi: Khi click vào thì sẽ reset, dùng điện thoại kết nối vào wifi ảo để cấu hình lại wifi
-    
-- Yêu cầu cho web server
-    + Giao diện đơn giản, dễ sử dụng
-    + Kết nối mượt, không bị treo, lag khi kết nối
-
-- Chú ý:
-    + điều khiển online và offline là 2 thứ tách rời nhau
-    + Tức là khi không có wifi thì vẫn có thể dùng keypad để mở cửa một cách bình thường
-    + Khi có wifi thì có thể điều khiển mở đóng cửa thêm qua web
-    + Tuyệt đối không đụng tới phần code đã code và chạy ổn trước đó
-    + Chỉ code thêm các chức năng mới thôi 
-    + Đừng có tạo file readme bừa bãi. Chỉ cần update các chức năng cần thiết thôi 
-
-
-
 Bây giờ bạn code cho tôi những thứ sau
 
 - wifi manager

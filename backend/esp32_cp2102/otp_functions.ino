@@ -20,7 +20,8 @@ static OtpState otpState;
 // ===== Internal helpers =====
 static uint64_t nowMsFallback(bool &isServerTime) {
   time_t now = Firebase.getCurrentTime();
-  if (now > 0) {
+  // Ignore invalid RTC values (e.g., 1970/epoch ~0) — require >= 1e9s (~2001)
+  if (now >= 1000000000) {
     isServerTime = true;
     return (uint64_t)now * 1000ULL;
   }
@@ -131,13 +132,22 @@ void syncOtpFromCloud() {
     return (uint64_t)v; // epoch milli
   };
 
-  uint64_t expireMs = toMs(expires);
-  if (expireMs == 0)
-    expireMs = toMs(expireAt);
+  // Ưu tiên hạn dựa trên timestamp server + duration để tránh lệch giờ client
+  uint64_t expiresFieldMs = toMs(expires);
+  uint64_t expireAtFieldMs = toMs(expireAt);
+  uint64_t derivedFromServer = 0;
 
-  // fallback: timestamp + durationSeconds
-  if (expireMs == 0 && durationSec > 0 && tsCreated > 0) {
-    expireMs = toMs(tsCreated) + (uint64_t)(durationSec * 1000.0);
+  if (durationSec > 0 && tsCreated > 0) {
+    derivedFromServer = toMs(tsCreated) + (uint64_t)(durationSec * 1000.0);
+  }
+
+  uint64_t expireMs = 0;
+  if (derivedFromServer > 0) {
+    expireMs = derivedFromServer;
+  } else if (expiresFieldMs > 0) {
+    expireMs = expiresFieldMs;
+  } else if (expireAtFieldMs > 0) {
+    expireMs = expireAtFieldMs;
   }
 
   // Nếu vẫn không có hạn, coi như OTP không hợp lệ -> xoá cache

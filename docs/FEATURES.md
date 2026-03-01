@@ -1,6 +1,6 @@
 # Smart Door - Tính năng đã hoàn thành
 
-> **Cập nhật lần cuối:** 2026-02-26  
+> **Cập nhật lần cuối:** 2026-03-01  
 > **Trạng thái:** ~90% hoàn thành
 
 ---
@@ -103,6 +103,10 @@
 | ✅ Thực thi lệnh        | Mở/đóng cửa từ lệnh Firebase                              |
 | ✅ Ghi log sự kiện      | Push log với server timestamp                             |
 | ✅ Non-blocking         | Không ảnh hưởng hoạt động keypad                          |
+| ✅ OTP one-time         | Đồng bộ OTP 6 số từ `/otp`, cache cục bộ, 3s/lần          |
+| ✅ OTP hết hạn/bỏ trống | Từ chối OTP hết hạn hoặc không có `expiresAt`             |
+| ✅ OTP dùng rồi         | Đánh dấu `used: true` lên Firebase sau khi mở cửa         |
+
 
 ---
 
@@ -237,8 +241,8 @@
 | Phần cứng - Buzzer        | 7                 |
 | Phần cứng - WiFi          | 7                 |
 | Phần cứng - Web Server    | 5                 |
-| Phần cứng - Firebase      | 6                 |
-| **Tổng phần cứng**        | **52**            |
+| Phần cứng - Firebase      | 10                |
+| **Tổng phần cứng**        | **56**            |
 | Phần mềm - UI             | 6                 |
 | Phần mềm - Door Control   | 6                 |
 | Phần mềm - Voice          | 5                 |
@@ -250,7 +254,7 @@
 | Phần mềm - Login & Auth   | 8                 |
 | Phần mềm - Settings Page  | 10                |
 | **Tổng phần mềm**         | **57**            |
-| **TỔNG CỘNG**             | **109 tính năng** |
+| **TỔNG CỘNG**             | **113 tính năng** |
 
 ---
 
@@ -267,3 +271,4 @@
 | 2026-02-02 | Hoàn thiện Light mode với theme trắng - xanh da trời               |
 | 2026-02-02 | Tinh chỉnh Date Picker light-mode (màu sáng + shadow)              |
 | 2026-02-26 | Auto-close 10s cho lệnh mở từ web + badge đếm ngược trên UI        |
+| 2026-03-01 | Hoàn thiện OTP backend: đồng bộ 3s/lần, timeout 2s, chặn hết hạn/không hạn, đánh dấu used |
