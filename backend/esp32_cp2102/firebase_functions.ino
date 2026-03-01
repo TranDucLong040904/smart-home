@@ -24,8 +24,10 @@ FirebaseConfig config;
 bool firebaseReady = false;
 unsigned long lastFirebaseUpdate = 0;
 unsigned long lastCommandCheck = 0;
-#define FIREBASE_UPDATE_INTERVAL 2000UL // Update status every 2s
-#define COMMAND_CHECK_INTERVAL 500UL    // Check commands every 500ms
+unsigned long lastOtpCheck = 0;
+#define FIREBASE_UPDATE_INTERVAL 3000UL // Status 3s để giảm tải
+#define COMMAND_CHECK_INTERVAL 1000UL   // Lệnh mỗi 1s
+#define OTP_SYNC_INTERVAL 3000UL        // OTP mỗi 3s (non-critical)
 
 /* ================= SETUP FIREBASE ================= */
 void setupFirebase() {
@@ -40,11 +42,15 @@ void setupFirebase() {
   config.database_url = FIREBASE_HOST;
   config.signer.tokens.legacy_token = FIREBASE_DATABASE_SECRET;
 
+  // Timeout ngắn để tránh block lâu khi mạng kém (API v4.x)
+  config.timeout.serverResponse = 2000;    // 2s
+  config.timeout.socketConnection = 5000;  // 5s
+
   // Initialize Firebase
   Firebase.begin(&config, &auth);
   Firebase.reconnectWiFi(true);
 
-  // Set timeout
+  // Set timeout nhỏ để tránh block lâu
   fbdo.setBSSLBufferSize(1024, 1024);
   fbdo.setResponseSize(1024);
 
@@ -66,6 +72,12 @@ void handleFirebase() {
   if (now - lastCommandCheck >= COMMAND_CHECK_INTERVAL) {
     lastCommandCheck = now;
     checkCloudCommand();
+  }
+
+  // OTP sync tách riêng, chu kỳ dài hơn
+  if (now - lastOtpCheck >= OTP_SYNC_INTERVAL) {
+    lastOtpCheck = now;
+    syncOtpFromCloud();
   }
 
   // Update device status to cloud

@@ -189,6 +189,8 @@ void setup() {
   EEPROM.begin(512);
 
   // LCD
+  Wire.begin(LCD_SDA_PIN, LCD_SCL_PIN);
+  Wire.setClock(100000); // Giảm tốc I2C để ổn định LCD
   lcd.init();
   lcd.backlight();
 
@@ -327,7 +329,20 @@ void handleOK() {
   lcd.setCursor(0, 0);
 
   if (state == INPUT_PASSWORD) {
-    if (strcmp(inputPass, savedPass) == 0) {
+    if (verifyOtpAndConsume(inputPass, inputLen)) {
+      lcd.print("OTP hop le");
+      beepSuccess();
+
+      openDoor();
+
+      failCount = 0;
+      state = AUTH_SUCCESS;
+      authTime = millis();
+      delay(800);
+      showAuthScreen();
+    }
+
+    else if (strcmp(inputPass, savedPass) == 0) {
       lcd.print("Da mo khoa");
       beepSuccess();
 
