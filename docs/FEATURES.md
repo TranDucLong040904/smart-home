@@ -1,6 +1,6 @@
 # Smart Door - Tính năng đã hoàn thành
 
-> **Cập nhật lần cuối:** 2026-01-29  
+> **Cập nhật lần cuối:** 2026-02-26  
 > **Trạng thái:** ~90% hoàn thành
 
 ---
@@ -128,6 +128,7 @@
 | ✅ Icon realtime | Thay đổi lock/lock_open theo trạng thái |
 | ✅ Status text   | Hiển thị "MỞ" (xanh) / "ĐÓNG" (đỏ)      |
 | ✅ Glow effect   | Hiệu ứng phát sáng theo trạng thái      |
+| ✅ Tự đóng 10s   | Lệnh mở từ web tự đóng sau 10s, có badge đếm ngược |
 
 ### 3. Điều khiển giọng nói
 
@@ -239,7 +240,7 @@
 | Phần cứng - Firebase      | 6                 |
 | **Tổng phần cứng**        | **52**            |
 | Phần mềm - UI             | 6                 |
-| Phần mềm - Door Control   | 5                 |
+| Phần mềm - Door Control   | 6                 |
 | Phần mềm - Voice          | 5                 |
 | Phần mềm - OTP            | 5                 |
 | Phần mềm - WiFi UI        | 6                 |
@@ -248,8 +249,8 @@
 | Phần mềm - Clock          | 2                 |
 | Phần mềm - Login & Auth   | 8                 |
 | Phần mềm - Settings Page  | 10                |
-| **Tổng phần mềm**         | **56**            |
-| **TỔNG CỘNG**             | **108 tính năng** |
+| **Tổng phần mềm**         | **57**            |
+| **TỔNG CỘNG**             | **109 tính năng** |
 
 ---
 
@@ -265,3 +266,4 @@
 | 2026-02-02 | Thêm trang Cài Đặt với WiFi, Dark mode UI, Logout, Đổi MK          |
 | 2026-02-02 | Hoàn thiện Light mode với theme trắng - xanh da trời               |
 | 2026-02-02 | Tinh chỉnh Date Picker light-mode (màu sáng + shadow)              |
+| 2026-02-26 | Auto-close 10s cho lệnh mở từ web + badge đếm ngược trên UI        |
