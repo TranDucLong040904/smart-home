@@ -198,42 +198,7 @@
           </div>
 
           <div class="form-group">
-            <label>Thời hạn hiệu lực</label>
-            <div class="otp-duration-inputs">
-              <div class="time-input-group">
-                <input
-                  type="number"
-                  class="glass-input time-input"
-                  id="otpHours"
-                  min="0"
-                  max="23"
-                  value="0"
-                />
-                <span>giờ</span>
-              </div>
-              <div class="time-input-group">
-                <input
-                  type="number"
-                  class="glass-input time-input"
-                  id="otpMinutes"
-                  min="0"
-                  max="59"
-                  value="0"
-                />
-                <span>phút</span>
-              </div>
-              <div class="time-input-group">
-                <input
-                  type="number"
-                  class="glass-input time-input"
-                  id="otpSeconds"
-                  min="0"
-                  max="59"
-                  value="0"
-                />
-                <span>giây</span>
-              </div>
-            </div>
+            <label>OTP dùng một lần (TTL do thiết bị quy định)</label>
           </div>
 
           <div class="otp-display">
@@ -246,7 +211,7 @@
               <span class="material-symbols-outlined" style="font-size: 14px"
                 >timer</span
               >
-              <span id="otpTimer">--:--:--</span>
+              <span id="otpTimer"></span>
             </span>
             <div class="otp-actions">
               <button

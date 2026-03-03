@@ -6,12 +6,15 @@
 // ===== State Variables =====
 let doorStatus = 'closed';
 let isConnected = false;
-let otpTimer = null;
-let otpEndTime = null;
 const AUTO_CLOSE_REMOTE_MS = 10000;
 let autoCloseTimer = null;
 let autoCloseEndTime = null;
 let webOpenRequestedAt = null;
+
+// OTP TTL & countdown state (driven by Firebase config)
+let otpTtlMs = null;
+let otpCountdownTimer = null;
+let otpCountdownEnd = null;
 
 
 // ===== Initialize on DOM Load =====
@@ -65,6 +68,37 @@ function initFirebaseListeners() {
         updateWiFiStatus(data.wifi);
       }
     }
+  });
+
+  // Listen for OTP TTL config
+  database.ref(DB_PATHS.config + '/otpTtlMs').on('value', (snapshot) => {
+    const val = snapshot.val();
+    if (typeof val === 'number' && val > 0) {
+      otpTtlMs = val;
+    } else {
+      otpTtlMs = null;
+    }
+    updateOtpTimerLabel();
+  });
+
+  // Listen for OTP status (used/expired) to clear UI when consumed/timeout
+  database.ref(DB_PATHS.commands + '/otp').on('value', (snapshot) => {
+    const otp = snapshot.val();
+    if (!otp || !otp.code) {
+      resetOtpUI();
+      return;
+    }
+
+    // If backend marked used or expired, hide code
+    if (otp.status === 'used' || otp.status === 'expired' || otp.used === true) {
+      resetOtpUI();
+      return;
+    }
+
+    // If a new code arrives, set it and start countdown based on current TTL
+    const codeEl = document.getElementById('otpCode');
+    if (codeEl) codeEl.textContent = otp.code;
+    startOtpCountdown();
   });
   
   // Listen for connection state
@@ -258,17 +292,6 @@ function startVoiceControl() {
 
 // ===== OTP Functions =====
 function generateOTP() {
-  const hours = parseInt(document.getElementById('otpHours').value) || 0;
-  const minutes = parseInt(document.getElementById('otpMinutes').value) || 0;
-  const seconds = parseInt(document.getElementById('otpSeconds').value) || 0;
-  
-  const totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
-  
-  if (totalSeconds < 10) {
-    showNotification('Thời hạn OTP phải ít nhất 10 giây!', 'warning');
-    return;
-  }
-  
   const code = Math.floor(100000 + Math.random() * 900000).toString();
   
   // Display OTP
@@ -276,24 +299,11 @@ function generateOTP() {
   if (otpCodeEl) {
     otpCodeEl.textContent = code;
   }
-  
-  // Start timer
-  otpEndTime = Date.now() + (totalSeconds * 1000);
-  
-  if (otpTimer) {
-    clearInterval(otpTimer);
-  }
-  
-  otpTimer = setInterval(updateOTPTimer, 1000);
-  updateOTPTimer();
-  
+  startOtpCountdown();
+
   // Save to Firebase
   database.ref(DB_PATHS.commands + '/otp').set({
     code: code,
-    expires: otpEndTime,            // epoch ms (client clock)
-    expireAt: otpEndTime,           // duplicate for compatibility
-    durationSeconds: totalSeconds,
-    timestamp: firebase.database.ServerValue.TIMESTAMP, // server time for backend fallback
     used: false,
     status: 'active'
   }).then(() => {
@@ -301,42 +311,13 @@ function generateOTP() {
   });
 }
 
-function updateOTPTimer() {
-  const timerEl = document.getElementById('otpTimer');
-  if (!timerEl || !otpEndTime) return;
-  
-  const remaining = Math.max(0, otpEndTime - Date.now());
-  
-  if (remaining === 0) {
-    clearInterval(otpTimer);
-    timerEl.textContent = 'Hết hạn';
-    document.getElementById('otpCode').textContent = '------';
-    return;
-  }
-  
-  const hours = Math.floor(remaining / 3600000);
-  const minutes = Math.floor((remaining % 3600000) / 60000);
-  const seconds = Math.floor((remaining % 60000) / 1000);
-  
-  if (hours > 0) {
-    timerEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  } else {
-    timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  }
-}
-
 function deleteOTP() {
-  if (otpTimer) {
-    clearInterval(otpTimer);
-    otpTimer = null;
-  }
-  otpEndTime = null;
-  
   const otpCodeEl = document.getElementById('otpCode');
   const timerEl = document.getElementById('otpTimer');
   
   if (otpCodeEl) otpCodeEl.textContent = '------';
-  if (timerEl) timerEl.textContent = '--:--:--';
+  if (timerEl) timerEl.textContent = 'Theo cấu hình thiết bị';
+  stopOtpCountdown();
   
   // Remove from Firebase
   database.ref(DB_PATHS.commands + '/otp').remove().then(() => {
@@ -344,6 +325,70 @@ function deleteOTP() {
   }).catch((error) => {
     showNotification('Lỗi: ' + error.message, 'error');
   });
+}
+
+// ===== OTP Countdown Helpers =====
+function updateOtpTimerLabel() {
+  const timerEl = document.getElementById('otpTimer');
+  if (!timerEl) return;
+  if (otpTtlMs && otpTtlMs >= 1000) {
+    timerEl.textContent = formatMs(otpTtlMs);
+  } else {
+    timerEl.textContent = '';
+  }
+}
+
+function formatMs(ms) {
+  const totalSec = Math.max(0, Math.floor(ms / 1000));
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  if (m > 0) return `${m}m${s.toString().padStart(2, '0')}s`;
+  return `${s}s`;
+}
+
+function startOtpCountdown() {
+  stopOtpCountdown();
+
+  if (!otpTtlMs || otpTtlMs < 1000) {
+    updateOtpTimerLabel();
+    return;
+  }
+
+  otpCountdownEnd = Date.now() + otpTtlMs;
+  const timerEl = document.getElementById('otpTimer');
+  updateOtpCountdown();
+
+  otpCountdownTimer = setInterval(() => {
+    updateOtpCountdown();
+  }, 1000);
+
+  function updateOtpCountdown() {
+    if (!timerEl) return;
+    const remaining = otpCountdownEnd - Date.now();
+    if (remaining <= 0) {
+      timerEl.textContent = 'Hết hạn';
+      stopOtpCountdown();
+      resetOtpUI();
+      return;
+    }
+    timerEl.textContent = formatMs(remaining);
+  }
+}
+
+function stopOtpCountdown() {
+  if (otpCountdownTimer) {
+    clearInterval(otpCountdownTimer);
+    otpCountdownTimer = null;
+  }
+  otpCountdownEnd = null;
+}
+
+function resetOtpUI() {
+  stopOtpCountdown();
+  const otpCodeEl = document.getElementById('otpCode');
+  const timerEl = document.getElementById('otpTimer');
+  if (otpCodeEl) otpCodeEl.textContent = '------';
+  if (timerEl) timerEl.textContent = 'Theo cấu hình thiết bị';
 }
 
 // ===== WiFi Functions =====

@@ -190,7 +190,8 @@ void setup() {
 
   // LCD
   Wire.begin(LCD_SDA_PIN, LCD_SCL_PIN);
-  Wire.setClock(100000); // Giảm tốc I2C để ổn định LCD
+  delay(50);             // Chờ LCD sẵn sàng sau khi cấp nguồn
+  Wire.setClock(60000);  // I2C ~60kHz để tăng ổn định khi dây dài/nhiễu
   lcd.init();
   lcd.backlight();
 

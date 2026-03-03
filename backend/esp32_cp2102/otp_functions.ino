@@ -8,14 +8,19 @@
 
 struct OtpState {
   String code;
-  uint64_t expireAtMs = 0; // Epoch millis do frontend ghi xuống
+  uint64_t expireAtMs = 0; // Epoch millis tính từ TTL (nếu có server time)
+  uint32_t durationMs = 0; // TTL hiện tại (ms)
   bool used = false;
   bool hasOtp = false;
   unsigned long lastSync = 0;
+  unsigned long syncedAt = 0; // millis() tại thời điểm đồng bộ OTP
   bool lastTimeFromServer = false;
 };
 
 static OtpState otpState;
+static uint32_t otpTtlMs = 300000; // TTL mặc định 5 phút
+static unsigned long lastTtlFetch = 0;
+#define OTP_TTL_FETCH_INTERVAL 10000UL // 10s kiểm tra TTL một lần
 
 // ===== Internal helpers =====
 static uint64_t nowMsFallback(bool &isServerTime) {
@@ -39,28 +44,56 @@ static void markOtpStatus(const char *status, bool usedFlag) {
   Firebase.RTDB.updateNode(&fbdo, String(FB_PATH_COMMANDS) + "/otp", &update);
 }
 
+static void refreshOtpTtl() {
+  if (!Firebase.ready())
+    return;
+
+  unsigned long nowTick = millis();
+  if (nowTick - lastTtlFetch < OTP_TTL_FETCH_INTERVAL)
+    return;
+  lastTtlFetch = nowTick;
+
+  String path = String(FB_PATH_CONFIG) + "/otpTtlMs";
+  if (Firebase.RTDB.getInt(&fbdo, path)) {
+    int val = fbdo.intData();
+    // Giới hạn an toàn: 1s - 24h
+    if (val >= 1000 && val <= 86400000) {
+      otpTtlMs = (uint32_t)val;
+    }
+  }
+}
+
 static bool isOtpExpired() {
   if (!otpState.hasOtp)
     return true;
   if (otpState.used)
     return true;
-  if (otpState.expireAtMs == 0)
-    return false; // Không có hạn -> coi như còn hiệu lực
+  if (otpState.durationMs == 0 && otpState.expireAtMs == 0)
+    return false; // Không cấu hình hạn -> coi như còn hiệu lực
 
   bool isServerTime = false;
   uint64_t now = nowMsFallback(isServerTime);
-
-  // Nếu không có thời gian server nhưng expireAtMs là epoch ms rất lớn -> để an toàn, coi như hết hạn
-  if (!isServerTime && otpState.expireAtMs > 100000000000ULL) { // ~1973 in ms
-    return true;
-  }
-
   otpState.lastTimeFromServer = isServerTime;
 
-  if (now > otpState.expireAtMs) {
-    markOtpStatus("expired", true);
-    return true;
+  // Nếu có thời gian server và có expireAtMs -> so sánh epoch
+  if (isServerTime && otpState.expireAtMs > 0) {
+    if (now >= otpState.expireAtMs) {
+      markOtpStatus("expired", true);
+      return true;
+    }
+    return false;
   }
+
+  // Fallback: không có thời gian server, dùng duration + syncedAt
+  if (otpState.durationMs > 0 && otpState.syncedAt > 0) {
+    unsigned long elapsed = millis() - otpState.syncedAt;
+    if (elapsed >= otpState.durationMs) {
+      markOtpStatus("expired", true);
+      return true;
+    }
+    return false;
+  }
+
   return false;
 }
 
@@ -74,6 +107,8 @@ void syncOtpFromCloud() {
   unsigned long nowTick = millis();
   otpState.lastSync = nowTick;
 
+  refreshOtpTtl();
+
   String path = String(FB_PATH_COMMANDS) + "/otp";
   if (!Firebase.RTDB.getJSON(&fbdo, path)) {
     return;
@@ -84,10 +119,6 @@ void syncOtpFromCloud() {
 
   String code;
   bool used = false;
-  double expireAt = 0;
-  double expires = 0;
-  double durationSec = 0;
-  double tsCreated = 0;
 
   if (json.get(data, "code") && data.success) {
     code = data.to<String>();
@@ -97,69 +128,40 @@ void syncOtpFromCloud() {
     used = data.to<bool>();
   }
 
-  // chấp nhận cả expireAt (ms hoặc s) và expires (ms hoặc s)
-  if (json.get(data, "expireAt") && data.success) {
-    expireAt = data.to<double>();
-  }
-  if (json.get(data, "expires") && data.success) {
-    expires = data.to<double>();
-  }
-
-  // fallback: durationSeconds + timestamp
-  if (json.get(data, "durationSeconds") && data.success) {
-    durationSec = data.to<double>();
-  }
-  if (json.get(data, "timestamp") && data.success) {
-    tsCreated = data.to<double>();
-  }
-
   if (code.length() == 0) {
     otpState.hasOtp = false;
     otpState.code = "";
     otpState.used = false;
     otpState.expireAtMs = 0;
+    otpState.durationMs = 0;
+    otpState.syncedAt = 0;
     return;
   }
 
-  otpState.code = code;
-  otpState.used = used;
-  // Frontend có thể gửi epoch giây hoặc milli; nếu nhỏ hơn 2e9 coi là giây, nhân 1000
-  auto toMs = [](double v) -> uint64_t {
-    if (v <= 0)
-      return 0;
-    if (v < 2000000000.0) // epoch giây
-      return (uint64_t)(v * 1000.0);
-    return (uint64_t)v; // epoch milli
-  };
+  bool isNewOtp = (!otpState.hasOtp) || (otpState.code != code) || (otpState.used != used);
 
-  // Ưu tiên hạn dựa trên timestamp server + duration để tránh lệch giờ client
-  uint64_t expiresFieldMs = toMs(expires);
-  uint64_t expireAtFieldMs = toMs(expireAt);
-  uint64_t derivedFromServer = 0;
+  // Nếu OTP mới hoặc trạng thái used thay đổi -> reset bộ đếm TTL
+  if (isNewOtp) {
+    otpState.code = code;
+    otpState.used = used;
+    otpState.durationMs = otpTtlMs;
+    otpState.syncedAt = millis();
 
-  if (durationSec > 0 && tsCreated > 0) {
-    derivedFromServer = toMs(tsCreated) + (uint64_t)(durationSec * 1000.0);
+    bool isServerTime = false;
+    uint64_t base = nowMsFallback(isServerTime);
+    otpState.lastTimeFromServer = isServerTime;
+
+    if (isServerTime) {
+      otpState.expireAtMs = base + otpTtlMs;
+    } else {
+      otpState.expireAtMs = 0; // sẽ dùng fallback millis
+    }
+  } else {
+    // Giữ nguyên thời điểm hết hạn hiện tại để tránh reset TTL mỗi lần sync
+    // (chỉ cập nhật nếu cần thay đổi flag used theo cloud)
+    otpState.used = used;
   }
 
-  uint64_t expireMs = 0;
-  if (derivedFromServer > 0) {
-    expireMs = derivedFromServer;
-  } else if (expiresFieldMs > 0) {
-    expireMs = expiresFieldMs;
-  } else if (expireAtFieldMs > 0) {
-    expireMs = expireAtFieldMs;
-  }
-
-  // Nếu vẫn không có hạn, coi như OTP không hợp lệ -> xoá cache
-  if (expireMs == 0) {
-    otpState.hasOtp = false;
-    otpState.code = "";
-    otpState.used = false;
-    otpState.expireAtMs = 0;
-    return;
-  }
-
-  otpState.expireAtMs = expireMs;
   otpState.hasOtp = true;
 }
 

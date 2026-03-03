@@ -33,3 +33,5 @@ backend/firebase_config.h
 # Misc
 *.tmp
 *.swp
+
+promt.md
