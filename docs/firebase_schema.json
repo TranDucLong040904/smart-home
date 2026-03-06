@@ -1,30 +1,73 @@
 {
-  "devices": {
-    "esp32_cp2102": {
-      "door": "closed",
-      "locked": false,
-      "lastUpdate": 0,
-      "online": false
-    }
-  },
   "commands": {
     "esp32_cp2102": {
       "action": "none",
+      "otp": {
+        "code": "000000",
+        "used": false,
+        "status": "active",
+        "lastUpdate": 0,
+        "expireAt": 0
+      },
       "timestamp": 0
     }
   },
   "config": {
     "esp32_cp2102": {
+      "accounts": {
+        "admin": {
+          "id": "admin_local",
+          "name": "Admin",
+          "password": "002525",
+          "updatedAt": 0,
+          "updatedBy": "system"
+        },
+        "users": {
+          "user_1": {
+            "id": "user_1",
+            "name": "User 1",
+            "password": "123456",
+            "updatedAt": 0,
+            "updatedBy": "web"
+          }
+        },
+        "meta": {
+          "maxUsers": 10,
+          "version": 1,
+          "lastSync": 0
+        }
+      },
       "maxFailAttempts": 3,
       "lockoutTime": 10,
-      "doorOpenTime": 5
+      "doorOpenTime": 5,
+      "otpTtlMs": 16000
+    }
+  },
+  "devices": {
+    "esp32_cp2102": {
+      "door": "closed",
+      "locked": false,
+      "lastUpdate": 0,
+      "online": false,
+      "wifi": {
+        "ssid": "",
+        "ip": "0.0.0.0",
+        "rssi": -100
+      }
     }
   },
   "logs": {
     "_placeholder": {
       "event": "system_init",
       "timestamp": 0,
-      "message": "Database initialized"
+      "message": "Database initialized",
+      "device": "esp32_cp2102",
+      "success": true,
+      "source": "system",
+      "authMethod": "SYSTEM",
+      "actorRole": "system",
+      "actorName": "System",
+      "actorId": "system"
     }
   }
 }

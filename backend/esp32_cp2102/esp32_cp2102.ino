@@ -23,6 +23,24 @@
 #include <Keypad.h>
 #include <LiquidCrystal_I2C.h>
 #include <ESP32Servo.h>
+#include <Firebase_ESP_Client.h>
+
+void savePasswordToEEPROM(const char *pass, byte len);
+void initAccessControl();
+void syncAccessControlFromCloud();
+bool authenticatePinAndSetSession(const char *input, byte len);
+void setOtpSessionContext();
+void clearAccessSession();
+bool isCurrentSessionAdmin();
+const char *getCurrentActorName();
+const char *getCurrentActorId();
+const char *getCurrentAuthMethod();
+const char *getCurrentRoleLabel();
+void onLocalAdminPasswordChanged();
+void logEventDetailed(const char *event, const char *message,
+                     const char *source, const char *authMethod,
+                     const char *actorRole, const char *actorName,
+                     const char *actorId, bool success);
 
 /* ================= GPIO PINS ================= */
 // LCD I2C (đã khai báo trong config.h)
@@ -217,6 +235,7 @@ void setup() {
 
   // Load password
   loadPasswordFromEEPROM();
+  initAccessControl();
 
   // Show screen
   showInputScreen();
@@ -331,10 +350,14 @@ void handleOK() {
 
   if (state == INPUT_PASSWORD) {
     if (verifyOtpAndConsume(inputPass, inputLen)) {
+      setOtpSessionContext();
       lcd.print("OTP hop le");
       beepSuccess();
 
       openDoor();
+      logEventDetailed("door_opened", "Opened via OTP", "keypad", "OTP",
+                       getCurrentRoleLabel(), getCurrentActorName(),
+                       getCurrentActorId(), true);
 
       failCount = 0;
       state = AUTH_SUCCESS;
@@ -343,11 +366,14 @@ void handleOK() {
       showAuthScreen();
     }
 
-    else if (strcmp(inputPass, savedPass) == 0) {
+    else if (authenticatePinAndSetSession(inputPass, inputLen)) {
       lcd.print("Da mo khoa");
       beepSuccess();
 
       openDoor(); // Mở cửa
+      logEventDetailed("door_opened", "Opened via keypad", "keypad",
+                       getCurrentAuthMethod(), getCurrentRoleLabel(),
+                       getCurrentActorName(), getCurrentActorId(), true);
 
       failCount = 0;
       state = AUTH_SUCCESS;
@@ -416,6 +442,9 @@ void handleOK() {
   else if (state == CHANGE_CONFIRM) {
     if (strcmp(inputPass, newPass) == 0) {
       savePasswordToEEPROM(newPass, newLen);
+      logEventDetailed("password_changed", "Admin changed password via keypad",
+                       "keypad", "ADMIN_PIN", "admin", getCurrentActorName(),
+                       "admin_local", true);
       lcd.print("Da luu MK");
       beepChangeOK();
       Serial.println("Password changed!");
@@ -432,7 +461,7 @@ void handleOK() {
 
 /* ================= CHANGE ================= */
 void handleChangeRequest() {
-  if (state == AUTH_SUCCESS)
+  if (state == AUTH_SUCCESS && isCurrentSessionAdmin())
     startChangePassword();
 }
 
@@ -508,7 +537,11 @@ void showAuthScreen() {
   lcd.setCursor(0, 0);
   lcd.print("Da mo khoa");
   lcd.setCursor(0, 1);
-  lcd.print("C: Doi MK");
+  if (isCurrentSessionAdmin()) {
+    lcd.print("C: Doi MK");
+  } else {
+    lcd.print("User mode");
+  }
   cursorCol = 0;
 }
 
@@ -532,6 +565,7 @@ void resetAll() {
   inputLen = newLen = 0;
   inputPass[0] = newPass[0] = '\0';
   state = INPUT_PASSWORD;
+  clearAccessSession();
   showInputScreen();
 }
 
@@ -581,6 +615,7 @@ void savePasswordToEEPROM(const char *pass, byte len) {
   savedLen = len;
   Serial.print("Saved password to EEPROM: ");
   Serial.println(pass);
+  onLocalAdminPasswordChanged();
 }
 
 /* ================= LOCK + COUNTDOWN ================= */

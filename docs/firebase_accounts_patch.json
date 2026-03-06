@@ -1,0 +1,23 @@
+{
+  "admin": {
+    "id": "admin_local",
+    "name": "Admin",
+    "password": "002525",
+    "updatedAt": 0,
+    "updatedBy": "system"
+  },
+  "users": {
+    "long": {
+      "id": "Long",
+      "name": "Long",
+      "password": "002626",
+      "updatedAt": 0,
+      "updatedBy": "system"
+    }
+  },
+  "meta": {
+    "maxUsers": 10,
+    "version": 1,
+    "lastSync": 0
+  }
+}

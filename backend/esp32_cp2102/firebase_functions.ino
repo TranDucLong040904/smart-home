@@ -25,9 +25,11 @@ bool firebaseReady = false;
 unsigned long lastFirebaseUpdate = 0;
 unsigned long lastCommandCheck = 0;
 unsigned long lastOtpCheck = 0;
+unsigned long lastAccountsCheck = 0;
 #define FIREBASE_UPDATE_INTERVAL 3000UL // Status 3s để giảm tải
 #define COMMAND_CHECK_INTERVAL 1000UL   // Lệnh mỗi 1s
 #define OTP_SYNC_INTERVAL 3000UL        // OTP mỗi 3s (non-critical)
+#define ACCOUNTS_SYNC_INTERVAL 5000UL   // Accounts mỗi 5s
 
 /* ================= SETUP FIREBASE ================= */
 void setupFirebase() {
@@ -80,6 +82,12 @@ void handleFirebase() {
     syncOtpFromCloud();
   }
 
+  // Accounts sync (admin + users)
+  if (now - lastAccountsCheck >= ACCOUNTS_SYNC_INTERVAL) {
+    lastAccountsCheck = now;
+    syncAccessControlFromCloud();
+  }
+
   // Update device status to cloud
   if (now - lastFirebaseUpdate >= FIREBASE_UPDATE_INTERVAL) {
     lastFirebaseUpdate = now;
@@ -124,19 +132,31 @@ void checkCloudCommand() {
       Firebase.RTDB.setString(&fbdo, String(FB_PATH_COMMANDS) + "/action",
                               "none");
       // Log event
-      logEvent("door_opened", "Opened via cloud command");
+      logEventDetailed("door_opened", "Opened via cloud command", "cloud",
+                       "CLOUD_COMMAND", "admin", "Web App", "cloud_web",
+                       true);
     } else if (command == "close" && doorOpen) {
       Serial.println(">>> FIREBASE: Close Door <<<");
       closeDoor();
       Firebase.RTDB.setString(&fbdo, String(FB_PATH_COMMANDS) + "/action",
                               "none");
-      logEvent("door_closed", "Closed via cloud command");
+      logEventDetailed("door_closed", "Closed via cloud command", "cloud",
+                       "CLOUD_COMMAND", "admin", "Web App", "cloud_web",
+                       true);
     }
   }
 }
 
 /* ================= LOG EVENT TO FIREBASE ================= */
 void logEvent(const char *event, const char *message) {
+  logEventDetailed(event, message, "system", "SYSTEM", "system", "System",
+                   "system", true);
+}
+
+void logEventDetailed(const char *event, const char *message, const char *source,
+                     const char *authMethod, const char *actorRole,
+                     const char *actorName, const char *actorId,
+                     bool success) {
   if (!Firebase.ready())
     return;
 
@@ -145,6 +165,12 @@ void logEvent(const char *event, const char *message) {
   json.set("message", message);
   json.set("timestamp/.sv", "timestamp"); // Server timestamp
   json.set("device", DEVICE_ID);
+  json.set("success", success);
+  json.set("source", source);
+  json.set("authMethod", authMethod);
+  json.set("actorRole", actorRole);
+  json.set("actorName", actorName);
+  json.set("actorId", actorId);
 
   // Push to logs (auto-generate unique ID)
   Firebase.RTDB.pushJSON(&fbdo, FB_PATH_LOGS, &json);

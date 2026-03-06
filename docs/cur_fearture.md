@@ -1,13 +1,15 @@
-# Báo cáo tính năng hiện tại (13-02-2026)
+# Báo cáo tính năng hiện tại (07-03-2026)
 
 ## Chức năng phần cứng (ESP32 CP2102 firmware)
 - Keypad 4x4 với state machine 4 trạng thái, hỗ trợ nhập/đổi mật khẩu, xoá ký tự, phím D đóng nhanh khi cửa đang mở.
+- Phân quyền keypad đã hoàn thiện: 1 admin local (EEPROM) + tối đa 10 user cloud (Firebase accounts).
 - Lưu mật khẩu EEPROM, mật khẩu mặc định 123456, kiểm tra độ mạnh (tối thiểu 6 ký tự, chặn ngày sinh/lặp/liên tiếp, không trùng mật khẩu cũ), khoá tạm 10s sau 3 lần sai, hết hạn phiên 5s.
+- Chỉ admin được đổi mật khẩu trên keypad; user chỉ có quyền mở cửa.
 - Servo điều khiển cửa (mở 90°, đóng 0°), giữ trạng thái, detach sau khởi tạo; nút trong nhà riêng (GPIO32) debounce 200ms để toggle mở/đóng.
 - Buzzer riêng (GPIO33) với nhiều mẫu âm: bíp phím, thành công, sai, khoá tạm, đổi mật khẩu.
 - LCD I2C 16x2 hiển thị màn hình nhập/mở khoá/đổi mật khẩu/lỗi/khoá tạm; quản lý con trỏ nhập.
 - WiFiManager non-blocking: AP `SmartDoor_Config` (12345678), portal timeout 3 phút, connect timeout 10s; web server cục bộ (/, /open, /close, /status, /resetwifi) hoạt động khi đã kết nối WiFi.
-- Firebase Realtime Database (Database Secret): cập nhật trạng thái cửa/khoá/online/WiFi mỗi 2s, nhận lệnh `open`/`close` mỗi 500ms, ghi log sự kiện lên `/logs`, đặt trạng thái offline khi cần.
+- Firebase Realtime Database (Database Secret): cập nhật trạng thái cửa/khoá/online/WiFi, nhận lệnh `open`/`close`, đồng bộ OTP và accounts theo chu kỳ, ghi log sự kiện chi tiết lên `/logs`.
 
 ## Chức năng phần mềm (Frontend web app)
 - Xác thực Firebase Auth Email/Password, bảo vệ trang; đồng bộ clock thời gian thực.
@@ -17,12 +19,13 @@
 - Cài đặt WiFi UI: xem SSID/IP hiện tại từ `/devices/wifi`, quét mạng (mock), gửi thông tin kết nối mới lên `/commands`.
 - Thông báo toast, hiệu ứng glassmorphism, dark/light theme (settings), đồng bộ trạng thái kết nối.
 - Trang Settings: hiển thị user, đổi mật khẩu Firebase (reauth), logout; đồng bộ trạng thái thiết bị.
-- Trang Admin/User demo: CRUD bảng tài khoản mock trên client, show/hide mật khẩu, đồng hồ header.
+- Trang Admin/User realtime: admin chỉ sửa tên/mật khẩu; user thêm/sửa/xóa; giới hạn tối đa 10 user; show/hide mật khẩu; hiển thị ngày tạo dd/mm/yyyy.
+- Lịch sử đã nâng cấp hiển thị người thực hiện và phương thức mở cửa theo log mới (`actorName`, `authMethod`, `actorRole`, `source`).
 
-## Phần mềm đã có UI nhưng chưa gắn với phần cứng/firmware
-- OTP: ESP32 firmware chưa đọc/thi hành `commands/otp` (chỉ nhận `action=open/close`), nên mã OTP chỉ tồn tại trên Firebase/UI.
-- WiFi scan/change: UI gửi `scan_wifi`/`change_wifi` qua `/commands` và mock danh sách mạng; firmware hiện chỉ dùng WiFiManager cục bộ, chưa đọc/áp dụng lệnh này, cũng chưa trả danh sách mạng về `/devices/networks`.
-- Trang Admin/User: dữ liệu mock tại client, chưa lưu Firebase hay áp dụng cho thiết bị.
+## Trạng thái tích hợp hiện tại
+- OTP đã tích hợp đầy đủ frontend + backend (ESP đọc, xác thực, dùng một lần, cập nhật trạng thái lên cloud).
+- Phân quyền tài khoản đã tích hợp frontend + backend (admin EEPROM + user cloud, đồng bộ 2 chiều cho admin).
+- WiFi scan/change trên UI vẫn đang ở mức mock, chưa có danh sách mạng realtime từ firmware.
 
 ## Chức năng dự kiến tương lai
 - Mở rộng Dashboard đa thiết bị (cửa, đèn, điều hoà, cảm biến DHT11/DHT22), quick actions, lịch sử gần.

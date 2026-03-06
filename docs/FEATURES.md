@@ -1,6 +1,6 @@
 # Smart Door - Tính năng đã hoàn thành
 
-> **Cập nhật lần cuối:** 2026-03-01  
+> **Cập nhật lần cuối:** 2026-03-07  
 > **Trạng thái:** ~90% hoàn thành
 
 ---
@@ -16,6 +16,8 @@
 | ✅ Khóa tạm 10s     | Sau 3 lần nhập sai, khóa hệ thống 10 giây                 |
 | ✅ Countdown LCD    | Hiển thị đếm ngược thời gian khóa trên màn hình LCD       |
 | ✅ Timeout xác thực | Phiên đăng nhập hết hạn sau 5 giây, quay về màn hình nhập |
+| ✅ Phân quyền keypad | 1 admin (EEPROM) + tối đa 10 user (cloud)                 |
+| ✅ Rule đổi mật khẩu | Chỉ admin đổi được mật khẩu trên keypad                    |
 
 ### 2. Quản lý mật khẩu (EEPROM)
 
@@ -106,6 +108,9 @@
 | ✅ OTP one-time         | Đồng bộ OTP 6 số từ `/otp`, cache cục bộ, 3s/lần          |
 | ✅ OTP hết hạn/bỏ trống | Từ chối OTP hết hạn hoặc không có `expiresAt`             |
 | ✅ OTP dùng rồi         | Đánh dấu `used: true` lên Firebase sau khi mở cửa         |
+| ✅ Sync accounts 5s      | Đồng bộ admin/user từ `/config/.../accounts`              |
+| ✅ Admin sync 2 chiều    | Đổi trên web cập nhật keypad, đổi trên keypad cập nhật web |
+| ✅ Log actor/method      | Log có `actorName`, `actorRole`, `authMethod`, `source`   |
 
 
 ---
@@ -191,13 +196,16 @@
 | ✅ Realtime clock  | Cập nhật mỗi giây                 |
 | ✅ Format Việt Nam | Giờ:Phút:Giây, Thứ ngày/tháng/năm |
 
-### 9. Quản lý tài khoản (UI demo)
+### 9. Quản lý tài khoản (Realtime)
 
 | Tính năng                | Mô tả                                                           |
 | ------------------------ | --------------------------------------------------------------- |
-| ✅ Bảng Admin/User (UI)  | Danh sách, thêm/sửa/xóa trên giao diện, show/hide mật khẩu demo |
-| ⚠️ Lưu trữ tạm thời      | Dữ liệu mock trên client; reload trang sẽ quay lại dữ liệu mẫu  |
-| ⚠️ Chưa kết nối Firebase | Chưa đọc/ghi Firestore/Realtime DB, chưa áp dụng Auth/Rules     |
+| ✅ Admin duy nhất         | Chỉ sửa tên/mật khẩu admin, không thêm/xóa admin               |
+| ✅ User CRUD              | Thêm/sửa/xóa user realtime trên Firebase                        |
+| ✅ Giới hạn 10 user       | Chặn thêm quá 10 tài khoản user                                 |
+| ✅ Show/hide mật khẩu     | Hiển/ẩn mật khẩu cho cả admin và user                           |
+| ✅ Đồng bộ thiết bị       | ESP đồng bộ tài khoản để xác thực trực tiếp từ keypad           |
+| ✅ Ngày tạo tài khoản     | Hiển thị ngày tạo định dạng dd/mm/yyyy                          |
 
 ### 10. Đăng nhập & Bảo mật (Firebase Auth)
 
@@ -272,3 +280,4 @@
 | 2026-02-02 | Tinh chỉnh Date Picker light-mode (màu sáng + shadow)              |
 | 2026-02-26 | Auto-close 10s cho lệnh mở từ web + badge đếm ngược trên UI        |
 | 2026-03-01 | Hoàn thiện OTP backend: đồng bộ 3s/lần, timeout 2s, chặn hết hạn/không hạn, đánh dấu used |
+| 2026-03-07 | Hoàn thiện phân quyền keypad: admin EEPROM + user cloud, sync 2 chiều admin, tài khoản realtime trên web, log lịch sử có tên người/phương thức |

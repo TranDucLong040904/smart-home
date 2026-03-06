@@ -241,8 +241,8 @@ function createLogItem(log) {
   
   const iconClass = getEventIconClass(log.event);
   const iconSymbol = getEventIcon(log.event);
-  const eventText = getEventText(log.event, log.message);
-  const userInfo = getUserInfo(log.device || 'system');
+  const eventText = getEventText(log.event, log.message, log.authMethod);
+  const userInfo = getUserInfo(log);
   const statusClass = log.success !== false ? 'success' : 'error';
   const statusText = log.success !== false ? 'Thành công' : 'Thất bại';
   
@@ -301,7 +301,18 @@ function getEventIcon(event) {
 }
 
 // ===== Vietnamese Event Text =====
-function getEventText(event, message) {
+function getEventText(event, message, authMethod = '') {
+  const methodLabels = {
+    ADMIN_PIN: 'Admin PIN',
+    USER_PIN: 'User PIN',
+    OTP: 'OTP',
+    CLOUD_COMMAND: 'Cloud',
+    SYSTEM: 'Hệ thống',
+    ADMIN_SYNC: 'Đồng bộ admin'
+  };
+
+  const methodTag = methodLabels[authMethod] ? ` (${methodLabels[authMethod]})` : '';
+
   // Convert English messages to Vietnamese
   if (message) {
     const translations = {
@@ -322,27 +333,27 @@ function getEventText(event, message) {
     
     // Check for exact match
     if (translations[message]) {
-      return translations[message];
+      return translations[message] + methodTag;
     }
     
     // Check for partial match
     for (const [en, vi] of Object.entries(translations)) {
       if (message.toLowerCase().includes(en.toLowerCase())) {
-        return vi;
+        return vi + methodTag;
       }
     }
     
     // If contains "cloud command", translate it
     if (message.includes('cloud command')) {
       if (message.toLowerCase().includes('open')) {
-        return 'Mở cửa từ ứng dụng';
+        return 'Mở cửa từ ứng dụng' + methodTag;
       } else if (message.toLowerCase().includes('close')) {
-        return 'Đóng cửa từ ứng dụng';
+        return 'Đóng cửa từ ứng dụng' + methodTag;
       }
-      return 'Lệnh từ ứng dụng';
+      return 'Lệnh từ ứng dụng' + methodTag;
     }
     
-    return message;
+    return message + methodTag;
   }
   
   // Default Vietnamese translations for events
@@ -356,11 +367,20 @@ function getEventText(event, message) {
     'lockout': 'Bị khóa tạm thời',
     'system_init': 'Khởi động hệ thống'
   };
-  return texts[event] || event;
+  return (texts[event] || event) + methodTag;
 }
 
-function getUserInfo(device) {
-  if (device === 'esp8266_01' || device === 'system') {
+function getUserInfo(log) {
+  if (log && log.actorName) {
+    const role = (log.actorRole || '').toLowerCase();
+    const className = role === 'admin' ? 'admin' : role === 'user' ? 'guest' : role === 'guest' ? 'guest' : 'system';
+    const initial = log.actorName[0] ? log.actorName[0].toUpperCase() : 'K';
+    return { name: log.actorName, initial, class: className };
+  }
+
+  const device = (log && log.device) ? log.device : 'system';
+
+  if (device === 'esp8266_01' || device === 'esp32_cp2102' || device === 'system') {
     return { name: 'Hệ thống', initial: 'H', class: 'system' };
   } else if (device === 'admin' || device === 'cloud') {
     return { name: 'Ứng dụng', initial: 'A', class: 'admin' };
