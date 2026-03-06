@@ -231,8 +231,49 @@ function closeModal() {
   editingUserId = null;
 }
 
-function isValidPin(value) {
-  return /^\d{6,16}$/.test(value);
+function isBirthdayPattern(value) {
+  if (!(value.length === 6 || value.length === 8)) return false;
+  const day = parseInt(value.slice(0, 2), 10);
+  const month = parseInt(value.slice(2, 4), 10);
+  return day >= 1 && day <= 31 && month >= 1 && month <= 12;
+}
+
+function isRepeatingPattern(value) {
+  if (value.length < 4) return false;
+  return value.split('').every((char) => char === value[0]);
+}
+
+function isSequentialPattern(value) {
+  if (value.length < 4) return false;
+
+  let increasing = true;
+  let decreasing = true;
+
+  for (let i = 1; i < value.length; i++) {
+    const diff = parseInt(value[i], 10) - parseInt(value[i - 1], 10);
+    if (diff !== 1) increasing = false;
+    if (diff !== -1) decreasing = false;
+    if (!increasing && !decreasing) return false;
+  }
+
+  return increasing || decreasing;
+}
+
+function validatePasswordRules(value) {
+  if (!/^\d{6,16}$/.test(value)) {
+    return { ok: false, message: 'Mật khẩu phải là số, độ dài từ 6 đến 16 ký tự' };
+  }
+  if (isBirthdayPattern(value)) {
+    return { ok: false, message: 'Mật khẩu không được có mẫu ngày sinh (ddMM, ddMMyy, ddMMyyyy)' };
+  }
+  if (isRepeatingPattern(value)) {
+    return { ok: false, message: 'Mật khẩu không được là chuỗi lặp (ví dụ 111111)' };
+  }
+  if (isSequentialPattern(value)) {
+    return { ok: false, message: 'Mật khẩu không được là chuỗi liên tiếp (ví dụ 123456 hoặc 654321)' };
+  }
+
+  return { ok: true, message: '' };
 }
 
 async function saveAccount() {
@@ -248,13 +289,17 @@ async function saveAccount() {
     return;
   }
 
-  if (!isValidPin(password)) {
-    alert('Mật khẩu phải là số, độ dài từ 6 đến 16 ký tự');
-    return;
-  }
-
   try {
     if (currentType === 'admin') {
+      const adminPasswordChanged = password !== adminAccount.password;
+      if (adminPasswordChanged) {
+        const validation = validatePasswordRules(password);
+        if (!validation.ok) {
+          alert(validation.message);
+          return;
+        }
+      }
+
       await database.ref(`${ACCOUNTS_PATH}/admin`).set({
         id: 'admin_local',
         name,
@@ -271,6 +316,15 @@ async function saveAccount() {
 
       const userId = editingUserId || `user_${Date.now()}`;
       const existingUser = userAccounts.find((item) => item.id === userId);
+      const userPasswordChanged = !editingUserId || password !== (existingUser?.password || '');
+
+      if (userPasswordChanged) {
+        const validation = validatePasswordRules(password);
+        if (!validation.ok) {
+          alert(validation.message);
+          return;
+        }
+      }
 
       if (!editingUserId) {
         await database.ref(`${ACCOUNTS_PATH}/users/_placeholder`).remove();
