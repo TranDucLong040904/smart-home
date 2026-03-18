@@ -43,9 +43,20 @@ void setLightOn(bool on) {
   applyLightState();
 }
 
+void setLightState(bool on, uint8_t r, uint8_t g, uint8_t b) {
+  lightOn = on;
+  lightR = r;
+  lightG = g;
+  lightB = b;
+  applyLightState();
+}
+
 void toggleLight() { setLightOn(!lightOn); }
 
 bool isLightOn() { return lightOn; }
+uint8_t getLightR() { return lightR; }
+uint8_t getLightG() { return lightG; }
+uint8_t getLightB() { return lightB; }
 
 String getLightStateJson() {
   String json = "\"light\":{";

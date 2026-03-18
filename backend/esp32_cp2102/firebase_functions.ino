@@ -15,6 +15,15 @@
 // Provide the RTDB payload printing info
 #include <addons/RTDBHelper.h>
 
+/* ================= EXTERNAL LIGHT API ================= */
+extern bool isLightOn();
+extern uint8_t getLightR();
+extern uint8_t getLightG();
+extern uint8_t getLightB();
+extern void setLightOn(bool on);
+extern void setLightState(bool on, uint8_t r, uint8_t g, uint8_t b);
+extern void toggleLight();
+
 /* ================= FIREBASE OBJECTS ================= */
 FirebaseData fbdo;
 FirebaseAuth auth;
@@ -112,6 +121,12 @@ void updateDeviceStatus() {
   Firebase.RTDB.setString(&fbdo, path + "/wifi/ssid", WiFi.SSID());
   Firebase.RTDB.setString(&fbdo, path + "/wifi/ip", WiFi.localIP().toString());
   Firebase.RTDB.setInt(&fbdo, path + "/wifi/rssi", WiFi.RSSI());
+
+  // Update light status
+  Firebase.RTDB.setBool(&fbdo, path + "/light/on", isLightOn());
+  Firebase.RTDB.setInt(&fbdo, path + "/light/r", getLightR());
+  Firebase.RTDB.setInt(&fbdo, path + "/light/g", getLightG());
+  Firebase.RTDB.setInt(&fbdo, path + "/light/b", getLightB());
 }
 
 /* ================= CHECK CLOUD COMMANDS ================= */
@@ -143,6 +158,56 @@ void checkCloudCommand() {
       logEventDetailed("door_closed", "Closed via cloud command", "cloud",
                        "CLOUD_COMMAND", "admin", "Web App", "cloud_web",
                        true);
+    }
+  }
+
+  String lightPath = String(FB_PATH_COMMANDS) + "/light";
+  String lightActionPath = lightPath + "/action";
+
+  if (Firebase.RTDB.getString(&fbdo, lightActionPath)) {
+    String action = fbdo.stringData();
+
+    if (action == "on") {
+      setLightOn(true);
+      Firebase.RTDB.setString(&fbdo, lightActionPath, "none");
+      Serial.println(">>> FIREBASE: Light ON <<<");
+    } else if (action == "off") {
+      setLightOn(false);
+      Firebase.RTDB.setString(&fbdo, lightActionPath, "none");
+      Serial.println(">>> FIREBASE: Light OFF <<<");
+    } else if (action == "toggle") {
+      toggleLight();
+      Firebase.RTDB.setString(&fbdo, lightActionPath, "none");
+      Serial.println(">>> FIREBASE: Light TOGGLE <<<");
+    } else if (action == "set") {
+      String colorPath = lightPath + "/color";
+      int r = 255;
+      int g = 255;
+      int b = 255;
+
+      if (Firebase.RTDB.getInt(&fbdo, colorPath + "/r"))
+        r = fbdo.intData();
+      if (Firebase.RTDB.getInt(&fbdo, colorPath + "/g"))
+        g = fbdo.intData();
+      if (Firebase.RTDB.getInt(&fbdo, colorPath + "/b"))
+        b = fbdo.intData();
+
+      if (r < 0)
+        r = 0;
+      if (r > 255)
+        r = 255;
+      if (g < 0)
+        g = 0;
+      if (g > 255)
+        g = 255;
+      if (b < 0)
+        b = 0;
+      if (b > 255)
+        b = 255;
+
+      setLightState(true, (uint8_t)r, (uint8_t)g, (uint8_t)b);
+      Firebase.RTDB.setString(&fbdo, lightActionPath, "none");
+      Serial.println(">>> FIREBASE: Light SET COLOR <<<");
     }
   }
 }

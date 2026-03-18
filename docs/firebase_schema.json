@@ -2,6 +2,14 @@
   "commands": {
     "esp32_cp2102": {
       "action": "none",
+      "light": {
+        "action": "none",
+        "color": {
+          "r": 255,
+          "g": 255,
+          "b": 255
+        }
+      },
       "otp": {
         "code": "000000",
         "used": false,
@@ -46,6 +54,12 @@
   "devices": {
     "esp32_cp2102": {
       "door": "closed",
+      "light": {
+        "on": false,
+        "r": 255,
+        "g": 255,
+        "b": 255
+      },
       "locked": false,
       "lastUpdate": 0,
       "online": false,
