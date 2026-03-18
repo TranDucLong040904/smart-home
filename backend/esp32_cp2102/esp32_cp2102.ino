@@ -32,6 +32,8 @@ bool authenticatePinAndSetSession(const char *input, byte len);
 void setOtpSessionContext();
 void clearAccessSession();
 bool isCurrentSessionAdmin();
+void initLightModule();
+void handleLightModule();
 const char *getCurrentActorName();
 const char *getCurrentActorId();
 const char *getCurrentAuthMethod();
@@ -236,6 +238,7 @@ void setup() {
   // Load password
   loadPasswordFromEEPROM();
   initAccessControl();
+  initLightModule();
 
   // Show screen
   showInputScreen();
@@ -268,6 +271,7 @@ void loop() {
   }
 
   handleIndoorButton();
+  handleLightModule();
   handleAuthTimeout();
   handleKeypad();
 }

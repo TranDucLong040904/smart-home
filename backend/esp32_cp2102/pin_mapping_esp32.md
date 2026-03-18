@@ -21,6 +21,9 @@
 | **Buzzer**      | I/O            | Signal         | G33       | Không chia sẻ với servo |
 | **Nút trong nhà** | 1            | NO/COM         | G32       | Kéo xuống GND, dùng pull-up nội |
 |                 | 2              | GND            | GND       | GND chung |
+| **Button đèn**  | 1              | NO/COM         | G14       | Input với pull-up nội, không cần điện trở |
+|                 | 2              | GND            | GND       | GND chung |
+| **WS2813 LED Stick 10** | DIN      | Data In        | G13       | Chân data LED |
 
 ## Kết nối chi tiết
 
@@ -60,10 +63,24 @@
 - Chân còn lại → GND
 - Cấu hình `INPUT_PULLUP` trong code; nhấn nút sẽ kéo xuống GND.
 
+### Button đèn (bấm bật/tắt đèn)
+- Một chân nút → G14
+- Chân còn lại → GND
+- Cấu hình `INPUT_PULLUP` trong code; nhấn nút sẽ kéo xuống GND.
+- Cách này không cần điện trở ngoài.
+
+### WS2813 LED Stick 10
+- DIN (Data In) → G13
+- VCC → 5V riêng
+- GND → GND chung với ESP32
+- Khuyến nghị thêm điện trở nối tiếp 330–470Ω trên dây DATA gần chân DIN để giảm nhiễu.
+- Khuyến nghị thêm tụ 470µF–1000µF giữa 5V và GND gần dải LED.
+
 ## Lý do chọn chân
 - Tránh toàn bộ nhóm boot-strap nhạy cảm (G0, G2, G4, G5, G12, G15) cho keypad; chỉ dùng G5 cho servo (ổn cho PWM, không bị ảnh hưởng boot vì đã có pull-up mặc định).
 - Không dùng TX/RX, không dùng chân chia sẻ như trước, bỏ hoàn toàn time-multiplexing servo/buzzer và keypad/nút.
 - Dùng cụm 16/17/18/19 (liên tiếp) cho Rows và 25/26/27/23 cho Cols để đi dây gọn, dễ nhớ.
+- G14 phù hợp cho nút đèn vì có pull-up nội; G13 phù hợp cho WS2813 vì là GPIO output an toàn.
 - I2C cố định 21/22 là chuẩn trên ESP32 38-pin.
 
 ## Checklist trước khi cấp nguồn
@@ -72,6 +89,7 @@
 - LCD: nếu không hiển thị, thử đổi địa chỉ 0x27 ↔ 0x3F.
 - Dây servo/buzzer ngắn, tụ 470µF gần servo.
 - Keypad: xác nhận không cắm nhầm hàng/cột; dây không vắt qua nguồn/anten Wi-Fi.
+- WS2813: data nên đi dây ngắn, nếu nhiễu thì thêm level shifter 3.3V->5V.
 
 ---
 

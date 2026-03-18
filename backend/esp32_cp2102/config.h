@@ -53,6 +53,13 @@
 #define INDOOR_BUTTON_PIN 32    // G32 - nút trong nhà
 
 // ============================================
+// GPIO PINS - LIGHT MODULE (WS2813 + Button)
+// ============================================
+#define LIGHT_LED_PIN 13    // G13 - WS2813 DIN
+#define LIGHT_BUTTON_PIN 14 // G14 - nút đèn (INPUT_PULLUP)
+#define LIGHT_LED_COUNT 10  // WS2813 LED Stick 10
+
+// ============================================
 // OTHER SETTINGS
 // ============================================
 #define MAX_INPUT_LENGTH 16 // Độ dài tối đa buffer
