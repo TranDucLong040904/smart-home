@@ -1,11 +1,11 @@
 # Smart Door - Tính năng đã hoàn thành
 
-> **Cập nhật lần cuối:** 2026-03-07  
-> **Trạng thái:** ~90% hoàn thành
+> **Cập nhật lần cuối:** 2026-03-19  
+> **Trạng thái:** ~96% hoàn thành
 
 ---
 
-## 🔧 PHẦN CỨNG (Backend - ESP8266 Wemos D1 Mini)
+## 🔧 PHẦN CỨNG (Backend - ESP32 CP2102)
 
 ### 1. Keypad & Xác thực PIN
 
@@ -85,15 +85,19 @@
 | ✅ Auto-reconnect        | Tự kết nối lại khi mất sóng                         |
 | ✅ Status check          | Kiểm tra trạng thái WiFi mỗi 5 giây                 |
 
-### 8. Web Server Local (ESP8266)
+### 8. Web Server Local (ESP32)
 
 | Endpoint        | Method | Chức năng                                 |
 | --------------- | ------ | ----------------------------------------- |
 | ✅ `/`          | GET    | Trang HTML điều khiển với giao diện đẹp   |
 | ✅ `/open`      | GET    | Mở cửa                                    |
 | ✅ `/close`     | GET    | Đóng cửa                                  |
-| ✅ `/status`    | GET    | JSON trạng thái: door, locked, wifi       |
+| ✅ `/status`    | GET    | JSON trạng thái: door, locked, wifi, light |
 | ✅ `/resetwifi` | GET    | Xóa WiFi credentials, restart vào AP mode |
+| ✅ `/light/on`  | GET    | Bật đèn WS2813                            |
+| ✅ `/light/off` | GET    | Tắt đèn WS2813                            |
+| ✅ `/light/toggle` | GET | Đảo trạng thái đèn                         |
+| ✅ `/light/set` | GET    | Đặt màu RGB qua query r,g,b               |
 
 ### 9. Firebase Realtime Database
 
@@ -111,6 +115,19 @@
 | ✅ Sync accounts 5s      | Đồng bộ admin/user từ `/config/.../accounts`              |
 | ✅ Admin sync 2 chiều    | Đổi trên web cập nhật keypad, đổi trên keypad cập nhật web |
 | ✅ Log actor/method      | Log có `actorName`, `actorRole`, `authMethod`, `source`   |
+| ✅ Sync trạng thái đèn   | Cập nhật `devices/.../light/{on,r,g,b}` từ ESP            |
+| ✅ Nhận lệnh đèn cloud   | Đọc `commands/.../light/action` (on/off/toggle/set)       |
+| ✅ Nhận màu RGB cloud    | Đọc `commands/.../light/color/{r,g,b}`                    |
+
+### 10. Smart Light WS2813 (Backend)
+
+| Tính năng                  | Mô tả                                                          |
+| -------------------------- | -------------------------------------------------------------- |
+| ✅ Module riêng cho đèn     | Tách file backend đèn để quản lý độc lập                       |
+| ✅ Bật/tắt bằng nút cứng    | Nút G14 với INPUT_PULLUP, debounce 200ms                       |
+| ✅ Điều khiển RGB           | Lưu và áp dụng trạng thái màu r,g,b                            |
+| ✅ Điều khiển web local     | Bật/tắt/đổi màu trực tiếp từ web server local                  |
+| ✅ Đồng bộ cloud            | Trạng thái đèn và lệnh đèn đồng bộ 2 chiều qua Firebase        |
 
 
 ---
@@ -144,7 +161,7 @@
 | Tính năng         | Mô tả                                  |
 | ----------------- | -------------------------------------- |
 | ✅ Web Speech API | Sử dụng SpeechRecognition              |
-| ✅ Tiếng Việt     | Nhận dạng "Mở cửa", "Đóng cửa"         |
+| ✅ Tiếng Việt     | Nhận dạng "Mở cửa", "Đóng cửa", "Bật đèn", "Tắt đèn" |
 | ✅ Tiếng Anh      | Nhận dạng "Open", "Close"              |
 | ✅ Status display | Hiển thị trạng thái nghe và transcript |
 | ✅ Gợi ý lệnh     | Hiển thị các lệnh có thể nói           |
@@ -175,8 +192,10 @@
 | Tính năng             | Mô tả                                 |
 | --------------------- | ------------------------------------- |
 | ✅ Realtime listeners | Lắng nghe thay đổi từ `/devices`      |
+| ✅ Listener trạng thái đèn | Lắng nghe `devices/.../light` realtime |
 | ✅ Connection status  | Hiển thị "Đã kết nối" / "Mất kết nối" |
 | ✅ Send commands      | Gửi action lên `/commands`            |
+| ✅ Send light commands | Gửi `commands/.../light/action` và `color` |
 | ✅ Timestamp          | Sử dụng server timestamp              |
 
 ### 7. Notification System
@@ -235,6 +254,19 @@
 | ✅ Nút đăng xuất     | Logout khỏi Firebase Auth                  |
 | ✅ Thông tin app     | Version, Developer, Year                   |
 
+### 12. Điều khiển đèn thông minh (UI)
+
+| Tính năng                      | Mô tả                                                     |
+| ------------------------------ | --------------------------------------------------------- |
+| ✅ Card điều khiển đèn riêng    | Trạng thái bật/tắt + RGB realtime từ Firebase             |
+| ✅ Bật/Tắt nhanh                | Nút thao tác trực tiếp gửi lệnh cloud                     |
+| ✅ Ô màu preview                | Hiển thị màu hiện tại, click để mở bộ chọn màu            |
+| ✅ Color picker popup           | Kéo-thả điểm chọn màu, xác nhận bằng nút OK               |
+| ✅ Giữ điểm màu khi đang chọn   | Không bị reset vị trí khi dữ liệu cloud cập nhật realtime  |
+| ✅ HEX + RGB realtime           | Hiển thị đồng thời mã HEX và giá trị RGB                  |
+| ✅ Responsive mobile            | Tối ưu bố cục card đèn trên màn hình nhỏ                  |
+| ✅ Sắp xếp mobile ưu tiên Voice | Card giọng nói hiển thị đầu danh sách trên mobile/tablet  |
+
 ---
 
 ## 📊 Thống kê
@@ -248,21 +280,23 @@
 | Phần cứng - LCD           | 5                 |
 | Phần cứng - Buzzer        | 7                 |
 | Phần cứng - WiFi          | 7                 |
-| Phần cứng - Web Server    | 5                 |
-| Phần cứng - Firebase      | 10                |
-| **Tổng phần cứng**        | **56**            |
+| Phần cứng - Web Server    | 9                 |
+| Phần cứng - Firebase      | 13                |
+| Phần cứng - Smart Light   | 5                 |
+| **Tổng phần cứng**        | **68**            |
 | Phần mềm - UI             | 6                 |
 | Phần mềm - Door Control   | 6                 |
-| Phần mềm - Voice          | 5                 |
+| Phần mềm - Voice          | 6                 |
 | Phần mềm - OTP            | 5                 |
 | Phần mềm - WiFi UI        | 6                 |
-| Phần mềm - Firebase       | 4                 |
+| Phần mềm - Firebase       | 6                 |
 | Phần mềm - Notification   | 5                 |
 | Phần mềm - Clock          | 2                 |
 | Phần mềm - Login & Auth   | 8                 |
 | Phần mềm - Settings Page  | 10                |
-| **Tổng phần mềm**         | **57**            |
-| **TỔNG CỘNG**             | **113 tính năng** |
+| Phần mềm - Light UI       | 8                 |
+| **Tổng phần mềm**         | **68**            |
+| **TỔNG CỘNG**             | **136 tính năng** |
 
 ---
 
@@ -281,3 +315,4 @@
 | 2026-02-26 | Auto-close 10s cho lệnh mở từ web + badge đếm ngược trên UI        |
 | 2026-03-01 | Hoàn thiện OTP backend: đồng bộ 3s/lần, timeout 2s, chặn hết hạn/không hạn, đánh dấu used |
 | 2026-03-07 | Hoàn thiện phân quyền keypad: admin EEPROM + user cloud, sync 2 chiều admin, tài khoản realtime trên web, log lịch sử có tên người/phương thức |
+| 2026-03-19 | Hoàn thiện Smart Light WS2813: tách module backend/webserver, sync Firebase trạng thái + lệnh + màu; thêm card đèn, popup chọn màu, lệnh giọng nói bật/tắt đèn, tối ưu bố cục mobile |

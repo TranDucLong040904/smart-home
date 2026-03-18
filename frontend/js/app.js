@@ -16,6 +16,22 @@ let otpTtlMs = null;
 let otpCountdownTimer = null;
 let otpCountdownEnd = null;
 
+// Light state (Firebase-driven)
+let lightState = {
+  on: false,
+  r: 255,
+  g: 255,
+  b: 255,
+};
+
+let lightSelectedColor = { r: 255, g: 255, b: 255 };
+let isLightPaletteDragging = false;
+let lightPaletteCanvas = null;
+let lightPaletteCtx = null;
+let lightPickerModal = null;
+let isLightPickerOpen = false;
+let hasPendingLightSelection = false;
+
 
 // ===== Initialize on DOM Load =====
 document.addEventListener('DOMContentLoaded', () => {
@@ -29,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // User is authenticated, initialize app
     initClock();
+    initLightPalette();
     initFirebaseListeners();
   });
 });
@@ -66,6 +83,11 @@ function initFirebaseListeners() {
       // Update WiFi status from ESP
       if (data.wifi) {
         updateWiFiStatus(data.wifi);
+      }
+
+      // Update light status from ESP
+      if (data.light) {
+        updateLightUI(data.light);
       }
     }
   });
@@ -198,6 +220,357 @@ function updateConnectionStatus(online) {
   }
 }
 
+// ===== Light Control =====
+function updateLightUI(light) {
+  lightState.on = !!light.on;
+  lightState.r = Number.isFinite(light.r) ? light.r : 255;
+  lightState.g = Number.isFinite(light.g) ? light.g : 255;
+  lightState.b = Number.isFinite(light.b) ? light.b : 255;
+
+  const lightIcon = document.getElementById('lightIcon');
+  const lightStatusText = document.getElementById('lightStatusText');
+  const lightColorText = document.getElementById('lightColorText');
+  const lightHexText = document.getElementById('lightHexText');
+
+  if (lightIcon) {
+    lightIcon.classList.remove('on', 'off');
+    lightIcon.classList.add(lightState.on ? 'on' : 'off');
+  }
+
+  if (lightStatusText) {
+    lightStatusText.textContent = lightState.on ? 'BẬT' : 'TẮT';
+    lightStatusText.className = lightState.on ? 'status-open' : 'status-closed';
+  }
+
+  if (lightColorText) {
+    lightColorText.textContent = `RGB: ${lightState.r}, ${lightState.g}, ${lightState.b}`;
+  }
+
+  if (lightHexText) {
+    lightHexText.textContent = rgbToHex(lightState.r, lightState.g, lightState.b);
+  }
+
+  if (!isLightPaletteDragging) {
+    // Keep user's manual pick stable while the color picker is open.
+    if (isLightPickerOpen || hasPendingLightSelection) {
+      return;
+    }
+
+    lightSelectedColor = {
+      r: lightState.r,
+      g: lightState.g,
+      b: lightState.b,
+    };
+    updatePalettePickerFromRgb(lightState.r, lightState.g, lightState.b);
+  }
+}
+
+function sendLightAction(action) {
+  return database.ref(DB_PATHS.commands + '/light').update({
+    action,
+  });
+}
+
+function turnLightOn() {
+  sendLightAction('on')
+    .then(() => showNotification('Đã gửi lệnh bật đèn!', 'success'))
+    .catch((error) => showNotification('Lỗi: ' + error.message, 'error'));
+}
+
+function turnLightOff() {
+  sendLightAction('off')
+    .then(() => showNotification('Đã gửi lệnh tắt đèn!', 'success'))
+    .catch((error) => showNotification('Lỗi: ' + error.message, 'error'));
+}
+
+function toggleLight() {
+  sendLightAction('toggle')
+    .then(() => showNotification('Đã gửi lệnh đảo trạng thái đèn!', 'success'))
+    .catch((error) => showNotification('Lỗi: ' + error.message, 'error'));
+}
+
+function applyLightColor() {
+  const r = lightSelectedColor.r;
+  const g = lightSelectedColor.g;
+  const b = lightSelectedColor.b;
+
+  // User confirmed this choice; allow sync from device again.
+  hasPendingLightSelection = false;
+
+  database.ref(DB_PATHS.commands + '/light').update({
+    color: { r, g, b },
+    action: 'set',
+  }).then(() => {
+    showNotification('Đã gửi lệnh đổi màu đèn!', 'success');
+  }).catch((error) => {
+    showNotification('Lỗi: ' + error.message, 'error');
+  });
+}
+
+function previewLightColor() {
+  // Kept for backward compatibility with old markup.
+}
+
+function initLightPalette() {
+  lightPickerModal = document.getElementById('lightPickerModal');
+  lightPaletteCanvas = document.getElementById('lightColorCanvas');
+  if (!lightPaletteCanvas) return;
+
+  lightPaletteCtx = lightPaletteCanvas.getContext('2d');
+  if (!lightPaletteCtx) return;
+
+  resizeLightPaletteCanvas();
+  drawLightPalette();
+  updatePalettePickerFromRgb(255, 255, 255);
+
+  const onPointerDown = (event) => {
+    isLightPaletteDragging = true;
+    pickLightColorFromPointer(event);
+  };
+
+  const onPointerMove = (event) => {
+    if (!isLightPaletteDragging) return;
+    pickLightColorFromPointer(event);
+  };
+
+  const onPointerUp = () => {
+    isLightPaletteDragging = false;
+  };
+
+  lightPaletteCanvas.addEventListener('mousedown', onPointerDown);
+  lightPaletteCanvas.addEventListener('mousemove', onPointerMove);
+  window.addEventListener('mouseup', onPointerUp);
+
+  lightPaletteCanvas.addEventListener('touchstart', onPointerDown, { passive: true });
+  lightPaletteCanvas.addEventListener('touchmove', onPointerMove, { passive: true });
+  window.addEventListener('touchend', onPointerUp, { passive: true });
+  window.addEventListener('resize', () => {
+    resizeLightPaletteCanvas();
+    drawLightPalette();
+    updatePalettePickerFromRgb(lightSelectedColor.r, lightSelectedColor.g, lightSelectedColor.b);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeLightColorPicker();
+    }
+  });
+}
+
+function resizeLightPaletteCanvas() {
+  if (!lightPaletteCanvas) return;
+  const rect = lightPaletteCanvas.getBoundingClientRect();
+  const width = Math.max(280, Math.floor(rect.width || 480));
+  const height = Math.max(150, Math.floor(rect.height || 260));
+  if (lightPaletteCanvas.width !== width || lightPaletteCanvas.height !== height) {
+    lightPaletteCanvas.width = width;
+    lightPaletteCanvas.height = height;
+  }
+}
+
+function openLightColorPicker() {
+  if (!lightPickerModal) return;
+  isLightPickerOpen = true;
+  hasPendingLightSelection = false;
+
+  lightSelectedColor = {
+    r: lightState.r,
+    g: lightState.g,
+    b: lightState.b,
+  };
+
+  lightPickerModal.classList.add('active');
+  resizeLightPaletteCanvas();
+  drawLightPalette();
+  updatePalettePickerFromRgb(lightSelectedColor.r, lightSelectedColor.g, lightSelectedColor.b);
+}
+
+function closeLightColorPicker() {
+  if (!lightPickerModal) return;
+  lightPickerModal.classList.remove('active');
+  isLightPaletteDragging = false;
+  isLightPickerOpen = false;
+  hasPendingLightSelection = false;
+}
+
+function handleLightPickerBackdrop(event) {
+  if (event.target && event.target.id === 'lightPickerModal') {
+    closeLightColorPicker();
+  }
+}
+
+function drawLightPalette() {
+  if (!lightPaletteCanvas || !lightPaletteCtx) return;
+
+  const width = lightPaletteCanvas.width;
+  const height = lightPaletteCanvas.height;
+  const image = lightPaletteCtx.createImageData(width, height);
+  const data = image.data;
+
+  let idx = 0;
+  for (let y = 0; y < height; y++) {
+    const v = 1 - y / (height - 1);
+    for (let x = 0; x < width; x++) {
+      const h = (x / (width - 1)) * 360;
+      const rgb = hsvToRgb(h, 1, v);
+      data[idx++] = rgb.r;
+      data[idx++] = rgb.g;
+      data[idx++] = rgb.b;
+      data[idx++] = 255;
+    }
+  }
+
+  lightPaletteCtx.putImageData(image, 0, 0);
+}
+
+function pickLightColorFromPointer(event) {
+  if (!lightPaletteCanvas) return;
+
+  const rect = lightPaletteCanvas.getBoundingClientRect();
+  const point = getPointerClientPos(event);
+  let x = point.x - rect.left;
+  let y = point.y - rect.top;
+
+  x = Math.max(0, Math.min(rect.width - 1, x));
+  y = Math.max(0, Math.min(rect.height - 1, y));
+
+  const h = (x / (rect.width - 1)) * 360;
+  const v = 1 - y / (rect.height - 1);
+  const rgb = hsvToRgb(h, 1, v);
+
+  lightSelectedColor = rgb;
+  hasPendingLightSelection = true;
+  updateLightColorMeta(rgb.r, rgb.g, rgb.b);
+  updateLightPickerPoint(x, y, rect.width, rect.height);
+}
+
+function updatePalettePickerFromRgb(r, g, b) {
+  if (!lightPaletteCanvas) return;
+
+  const hsv = rgbToHsv(r, g, b);
+  const rect = lightPaletteCanvas.getBoundingClientRect();
+  const width = rect.width || lightPaletteCanvas.width;
+  const height = rect.height || lightPaletteCanvas.height;
+
+  const x = (hsv.h / 360) * (width - 1);
+  const y = (1 - hsv.v) * (height - 1);
+  updateLightPickerPoint(x, y, width, height);
+  updateLightColorMeta(r, g, b);
+}
+
+function updateLightColorMeta(r, g, b) {
+  const lightColorText = document.getElementById('lightColorText');
+  const lightHexText = document.getElementById('lightHexText');
+  const lightModalHexText = document.getElementById('lightModalHexText');
+  const lightColorChip = document.getElementById('lightColorChip');
+  const colorHex = rgbToHex(r, g, b);
+
+  if (lightColorText) {
+    lightColorText.textContent = `RGB: ${r}, ${g}, ${b}`;
+  }
+
+  if (lightHexText) {
+    lightHexText.textContent = colorHex;
+  }
+
+  if (lightModalHexText) {
+    lightModalHexText.textContent = colorHex;
+  }
+
+  if (lightColorChip) {
+    lightColorChip.style.background = `rgb(${r}, ${g}, ${b})`;
+  }
+}
+
+function updateLightPickerPoint(x, y, width, height) {
+  const point = document.getElementById('lightPickerPoint');
+  if (!point) return;
+
+  const safeX = Math.max(0, Math.min(width - 1, x));
+  const safeY = Math.max(0, Math.min(height - 1, y));
+  point.style.left = `${safeX}px`;
+  point.style.top = `${safeY}px`;
+}
+
+function getPointerClientPos(event) {
+  if (event.touches && event.touches.length > 0) {
+    return {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY,
+    };
+  }
+
+  return {
+    x: event.clientX,
+    y: event.clientY,
+  };
+}
+
+function hsvToRgb(h, s, v) {
+  const c = v * s;
+  const hh = h / 60;
+  const x = c * (1 - Math.abs((hh % 2) - 1));
+  let r1 = 0;
+  let g1 = 0;
+  let b1 = 0;
+
+  if (hh >= 0 && hh < 1) {
+    r1 = c;
+    g1 = x;
+  } else if (hh >= 1 && hh < 2) {
+    r1 = x;
+    g1 = c;
+  } else if (hh >= 2 && hh < 3) {
+    g1 = c;
+    b1 = x;
+  } else if (hh >= 3 && hh < 4) {
+    g1 = x;
+    b1 = c;
+  } else if (hh >= 4 && hh < 5) {
+    r1 = x;
+    b1 = c;
+  } else {
+    r1 = c;
+    b1 = x;
+  }
+
+  const m = v - c;
+  return {
+    r: Math.round((r1 + m) * 255),
+    g: Math.round((g1 + m) * 255),
+    b: Math.round((b1 + m) * 255),
+  };
+}
+
+function rgbToHsv(r, g, b) {
+  const rn = r / 255;
+  const gn = g / 255;
+  const bn = b / 255;
+  const max = Math.max(rn, gn, bn);
+  const min = Math.min(rn, gn, bn);
+  const d = max - min;
+
+  let h = 0;
+  if (d !== 0) {
+    if (max === rn) {
+      h = 60 * (((gn - bn) / d + 6) % 6);
+    } else if (max === gn) {
+      h = 60 * ((bn - rn) / d + 2);
+    } else {
+      h = 60 * ((rn - gn) / d + 4);
+    }
+  }
+
+  const s = max === 0 ? 0 : d / max;
+  const v = max;
+  return { h, s, v };
+}
+
+function rgbToHex(r, g, b) {
+  const toHex = (v) => v.toString(16).padStart(2, '0').toUpperCase();
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
 
 
 // ===== Voice Control =====
@@ -246,24 +619,54 @@ function startVoiceControl() {
       // Tiếng Anh
       'close door', 'close the door', 'lock', 'lock door', 'shut door'
     ];
+
+    const LIGHT_ON_PHRASES = [
+      'bật đèn', 'mở đèn', 'bật đèn phòng', 'bật đèn chính',
+      'turn on light', 'turn on the light', 'light on'
+    ];
+
+    const LIGHT_OFF_PHRASES = [
+      'tắt đèn', 'đóng đèn', 'tắt đèn phòng', 'tắt đèn chính',
+      'turn off light', 'turn off the light', 'light off'
+    ];
     
     // Kiểm tra cụm từ có trong câu nói không
     const isOpenCommand = OPEN_PHRASES.some(phrase => command.includes(phrase));
     const isCloseCommand = CLOSE_PHRASES.some(phrase => command.includes(phrase));
-    
-    if (isOpenCommand && !isCloseCommand) {
-      openDoor();
-    } else if (isCloseCommand && !isOpenCommand) {
-      closeDoor();
-    } else if (isOpenCommand && isCloseCommand) {
-      // Nếu có cả 2, ưu tiên cụm từ xuất hiện trước
-      const openIndex = Math.min(...OPEN_PHRASES.map(p => command.indexOf(p)).filter(i => i !== -1));
-      const closeIndex = Math.min(...CLOSE_PHRASES.map(p => command.indexOf(p)).filter(i => i !== -1));
-      
-      if (openIndex < closeIndex) openDoor();
-      else closeDoor();
+    const isLightOnCommand = LIGHT_ON_PHRASES.some(phrase => command.includes(phrase));
+    const isLightOffCommand = LIGHT_OFF_PHRASES.some(phrase => command.includes(phrase));
+
+    function firstMatchIndex(phrases, text) {
+      const matches = phrases.map((p) => text.indexOf(p)).filter((idx) => idx !== -1);
+      return matches.length ? Math.min(...matches) : Number.MAX_SAFE_INTEGER;
+    }
+
+    const openIdx = firstMatchIndex(OPEN_PHRASES, command);
+    const closeIdx = firstMatchIndex(CLOSE_PHRASES, command);
+    const lightOnIdx = firstMatchIndex(LIGHT_ON_PHRASES, command);
+    const lightOffIdx = firstMatchIndex(LIGHT_OFF_PHRASES, command);
+
+    const candidates = [];
+    if (isOpenCommand) candidates.push({ type: 'door_open', idx: openIdx });
+    if (isCloseCommand) candidates.push({ type: 'door_close', idx: closeIdx });
+    if (isLightOnCommand) candidates.push({ type: 'light_on', idx: lightOnIdx });
+    if (isLightOffCommand) candidates.push({ type: 'light_off', idx: lightOffIdx });
+
+    candidates.sort((a, b) => a.idx - b.idx);
+
+    if (candidates.length > 0) {
+      const selected = candidates[0].type;
+      if (selected === 'door_open') {
+        openDoor();
+      } else if (selected === 'door_close') {
+        closeDoor();
+      } else if (selected === 'light_on') {
+        turnLightOn();
+      } else if (selected === 'light_off') {
+        turnLightOff();
+      }
     } else {
-      showNotification('Không nhận dạng! Hãy nói: "mở cửa" hoặc "đóng cửa"', 'warning');
+      showNotification('Không nhận dạng! Hãy nói: "mở cửa", "đóng cửa" hoặc "bật đèn"', 'warning');
     }
     
     setTimeout(() => {
