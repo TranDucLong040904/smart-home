@@ -276,6 +276,62 @@ function validatePasswordRules(value) {
   return { ok: true, message: '' };
 }
 
+function normalizeName(value) {
+  return (value || '').trim().toLowerCase();
+}
+
+function getAllAccountsForValidation() {
+  const all = [];
+
+  if (adminAccount?.id && adminAccount?.name && adminAccount?.password) {
+    all.push({
+      id: adminAccount.id,
+      type: 'admin',
+      name: adminAccount.name,
+      password: adminAccount.password,
+      normalizedName: normalizeName(adminAccount.name),
+    });
+  }
+
+  userAccounts.forEach((item) => {
+    if (!item?.id || !item?.name || !item?.password) return;
+    all.push({
+      id: item.id,
+      type: 'user',
+      name: item.name,
+      password: item.password,
+      normalizedName: normalizeName(item.name),
+    });
+  });
+
+  return all;
+}
+
+function findDuplicateNameOrPassword({ id, name, password }) {
+  const normalizedTargetName = normalizeName(name);
+  const accounts = getAllAccountsForValidation();
+
+  for (const account of accounts) {
+    if (account.id === id) continue;
+
+    if (account.normalizedName === normalizedTargetName) {
+      return {
+        field: 'name',
+        message: `Tên "${name}" đã tồn tại. Vui lòng chọn tên khác.`,
+      };
+    }
+
+    if (account.password === password) {
+      return {
+        field: 'password',
+        message: 'Mật khẩu này đã được dùng cho tài khoản khác. Vui lòng chọn mật khẩu khác.',
+      };
+    }
+  }
+
+  return null;
+}
+
 async function saveAccount() {
   const nameInput = document.getElementById('accountName');
   const passInput = document.getElementById('accountPassword');
@@ -291,6 +347,16 @@ async function saveAccount() {
 
   try {
     if (currentType === 'admin') {
+      const duplicate = findDuplicateNameOrPassword({
+        id: 'admin_local',
+        name,
+        password,
+      });
+      if (duplicate) {
+        alert(duplicate.message);
+        return;
+      }
+
       const adminPasswordChanged = password !== adminAccount.password;
       if (adminPasswordChanged) {
         const validation = validatePasswordRules(password);
@@ -316,6 +382,17 @@ async function saveAccount() {
 
       const userId = editingUserId || `user_${Date.now()}`;
       const existingUser = userAccounts.find((item) => item.id === userId);
+
+      const duplicate = findDuplicateNameOrPassword({
+        id: userId,
+        name,
+        password,
+      });
+      if (duplicate) {
+        alert(duplicate.message);
+        return;
+      }
+
       const userPasswordChanged = !editingUserId || password !== (existingUser?.password || '');
 
       if (userPasswordChanged) {

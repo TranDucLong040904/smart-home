@@ -42,7 +42,7 @@
           </div>
           <div class="logo-text">
             <h1>Smart Home</h1>
-            <p>v2.0</p>
+            <p>v3.0</p>
           </div>
         </div>
 
@@ -146,51 +146,6 @@
                 <p>Mạng hiện tại: <strong id="currentSSID">---</strong></p>
                 <p>IP: <span id="currentIP">---</span></p>
               </div>
-            </div>
-
-            <!-- Scan Networks -->
-            <button class="btn btn-scan" onclick="scanNetworks()" id="btnScan">
-              <span class="material-symbols-outlined">wifi_find</span>
-              Quét mạng có sẵn
-            </button>
-
-            <div class="wifi-networks">
-              <h4 id="scanTitle">Mạng có sẵn</h4>
-              <div class="network-list" id="networkList">
-                <p class="network-hint">
-                  Nhấn "Quét mạng có sẵn" để tìm kiếm...
-                </p>
-              </div>
-            </div>
-
-            <!-- Password Input (Hidden until network selected) -->
-            <div id="connectForm" class="connect-form" style="display: none">
-              <div class="selected-network">
-                <span class="material-symbols-outlined">wifi</span>
-                <span id="selectedNetworkName">---</span>
-                <button class="btn-icon-cancel" onclick="cancelSelection()">
-                  <span class="material-symbols-outlined">close</span>
-                </button>
-              </div>
-              <div class="form-group">
-                <label>Mật khẩu mạng mới</label>
-                <div class="input-wrapper">
-                  <span class="material-symbols-outlined icon">key</span>
-                  <input
-                    type="password"
-                    class="glass-input"
-                    id="wifiPassword"
-                    placeholder="Nhập mật khẩu"
-                  />
-                  <button class="toggle-password" onclick="togglePassword()">
-                    <span class="material-symbols-outlined">visibility</span>
-                  </button>
-                </div>
-              </div>
-              <button class="btn btn-purple" onclick="changeWiFi()">
-                <span class="material-symbols-outlined">router</span>
-                Kết nối
-              </button>
             </div>
           </section>
 
@@ -334,7 +289,7 @@
             <div class="info-list">
               <div class="info-item">
                 <span class="info-label">Phiên bản</span>
-                <span class="info-value">2.0</span>
+                <span class="info-value">3.0</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Phát triển bởi</span>
@@ -342,7 +297,7 @@
               </div>
               <div class="info-item">
                 <span class="info-label">Ngày</span>
-                <span class="info-value">14/02/2026</span>
+                <span class="info-value">20/03/2026</span>
               </div>
             </div>
           </section>
@@ -374,7 +329,7 @@
 
     <!-- Footer -->
     <footer class="footer">
-      <p>Smart Home v2.0 - Developed by Duc Long</p>
+      <p>Smart Home v3.0 - Developed by Duc Long</p>
     </footer>
 
     <!-- Firebase SDK -->

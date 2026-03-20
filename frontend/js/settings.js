@@ -2,9 +2,6 @@
  * Smart Home - Settings Page JavaScript
  */
 
-// ===== State Variables =====
-let selectedNetwork = null;
-
 // ===== Initialize on DOM Load =====
 document.addEventListener('DOMContentLoaded', () => {
   // Check authentication first
@@ -229,118 +226,6 @@ function updateWiFiDisplay(wifi) {
   }
 }
 
-// ===== Toggle Password Visibility =====
-function togglePassword() {
-  const passwordInput = document.getElementById('wifiPassword');
-  const toggleBtn = document.querySelector('.toggle-password .material-symbols-outlined');
-  
-  if (passwordInput.type === 'password') {
-    passwordInput.type = 'text';
-    toggleBtn.textContent = 'visibility_off';
-  } else {
-    passwordInput.type = 'password';
-    toggleBtn.textContent = 'visibility';
-  }
-}
-
-// ===== Scan Networks =====
-function scanNetworks() {
-  const btn = document.getElementById('btnScan');
-  const networkList = document.getElementById('networkList');
-  
-  // Add loading state
-  btn.disabled = true;
-  btn.innerHTML = '<span class="material-symbols-outlined rotating">sync</span> Đang quét...';
-  
-  // Send scan command to Firebase
-  database.ref(DB_PATHS.commands).set({
-    action: 'scan_wifi',
-    timestamp: firebase.database.ServerValue.TIMESTAMP
-  });
-  
-  networkList.innerHTML = '<p class="network-hint">Đang quét mạng...</p>';
-  
-  // Listen for scan results
-  database.ref(DB_PATHS.devices + '/networks').once('value', (snapshot) => {
-    const networks = snapshot.val();
-    
-    btn.disabled = false;
-    btn.innerHTML = '<span class="material-symbols-outlined">wifi_find</span> Quét mạng có sẵn';
-    
-    if (networks && Array.isArray(networks)) {
-      displayNetworks(networks);
-    } else {
-      networkList.innerHTML = '<p class="network-hint">Không tìm thấy mạng nào</p>';
-    }
-  });
-  
-  // Timeout after 10 seconds
-  setTimeout(() => {
-    if (btn.disabled) {
-      btn.disabled = false;
-      btn.innerHTML = '<span class="material-symbols-outlined">wifi_find</span> Quét mạng có sẵn';
-    }
-  }, 10000);
-}
-
-// ===== Display Networks =====
-function displayNetworks(networks) {
-  const networkList = document.getElementById('networkList');
-  
-  if (!networks || networks.length === 0) {
-    networkList.innerHTML = '<p class="network-hint">Không tìm thấy mạng nào</p>';
-    return;
-  }
-  
-  networkList.innerHTML = networks.map(network => `
-    <div class="network-item" onclick="selectNetwork('${network.ssid}')">
-      <div class="network-info">
-        <span class="material-symbols-outlined">wifi</span>
-        <span class="network-name">${network.ssid}</span>
-      </div>
-      <div class="network-signal">
-        ${network.rssi > -50 ? '●●●●' : network.rssi > -70 ? '●●●○' : '●●○○'}
-      </div>
-    </div>
-  `).join('');
-}
-
-// ===== Select Network =====
-function selectNetwork(ssid) {
-  selectedNetwork = ssid;
-  document.getElementById('selectedNetworkName').textContent = ssid;
-  document.getElementById('connectForm').style.display = 'block';
-  document.getElementById('wifiPassword').value = '';
-  document.getElementById('wifiPassword').focus();
-}
-
-// ===== Cancel Selection =====
-function cancelSelection() {
-  selectedNetwork = null;
-  document.getElementById('connectForm').style.display = 'none';
-}
-
-// ===== Change WiFi =====
-function changeWiFi() {
-  const password = document.getElementById('wifiPassword').value;
-  
-  if (!selectedNetwork) {
-    showNotification('Vui lòng chọn mạng WiFi!', 'warning');
-    return;
-  }
-  
-  // Send WiFi credentials to Firebase
-  database.ref(DB_PATHS.commands).set({
-    action: 'change_wifi',
-    ssid: selectedNetwork,
-    password: password,
-    timestamp: firebase.database.ServerValue.TIMESTAMP
-  });
-  
-  showNotification(`Đang kết nối đến ${selectedNetwork}...`, 'info');
-  cancelSelection();
-}
-
 // ===== Show Notification =====
 function showNotification(message, type = 'info') {
   // Check if notification container exists
@@ -399,13 +284,6 @@ style.textContent = `
   @keyframes slideOut {
     from { transform: translateX(0); opacity: 1; }
     to { transform: translateX(100%); opacity: 0; }
-  }
-  .rotating {
-    animation: rotate 1s linear infinite;
-  }
-  @keyframes rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
   }
 `;
 document.head.appendChild(style);

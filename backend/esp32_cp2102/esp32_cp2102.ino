@@ -301,20 +301,20 @@ void handleDigit(char key) {
   if (state == INPUT_PASSWORD && inputLen < MAX_PASS_LEN) {
     inputPass[inputLen++] = key;
     inputPass[inputLen] = '\0';
-    lcd.print(key); // Hiển thị số (test)
-    // lcd.print('*');     // Ẩn mật khẩu (bật sau khi test xong)
+    // lcd.print(key); // Hiển thị số (test)
+    lcd.print('*');     // Ẩn mật khẩu (bật sau khi test xong)
     cursorCol++;
   } else if (state == CHANGE_NEW && newLen < MAX_PASS_LEN) {
     newPass[newLen++] = key;
     newPass[newLen] = '\0';
-    lcd.print(key);
-    // lcd.print('*');
+    // lcd.print(key);
+    lcd.print('*');
     cursorCol++;
   } else if (state == CHANGE_CONFIRM && inputLen < MAX_PASS_LEN) {
     inputPass[inputLen++] = key;
     inputPass[inputLen] = '\0';
-    lcd.print(key);
-    // lcd.print('*');
+    // lcd.print(key);
+    lcd.print('*');
     cursorCol++;
   }
 }
