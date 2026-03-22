@@ -1,0 +1,274 @@
+<div align="right">
+  <a href="README.md"><img src="https://img.shields.io/badge/English-blue?style=flat-square&logo=github&logoColor=white&labelColor=000080" alt="English"></a>
+  <a href="README.vi"><img src="https://img.shields.io/badge/Tiếng_Việt-red?style=flat-square&color=C90000" alt="Tiếng Việt"></a>
+</div>
+
+# Hệ Thống Cửa Thông Minh - ESP32 + Firebase + Web Dashboard
+
+<div align="center">
+
+![ESP32](https://img.shields.io/badge/ESP32-CP2102-111111?style=for-the-badge&logo=espressif&logoColor=white)
+![Arduino](https://img.shields.io/badge/Arduino-IDE-00979D?style=for-the-badge&logo=arduino&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-Realtime_DB-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
+![Frontend](https://img.shields.io/badge/Frontend-HTML%20%7C%20CSS%20%7C%20JS-0A66C2?style=for-the-badge&logo=googlechrome&logoColor=white)
+
+![Project](https://img.shields.io/badge/Dự_án-Smart%20Home-2E7D32?style=flat-square)
+![Status](https://img.shields.io/badge/Trạng_thái-Đang_phát_triển-success?style=flat-square)
+![Platform](https://img.shields.io/badge/Nền_tảng-Windows%20%7C%20ESP32-blue?style=flat-square)
+
+</div>
+
+---
+<a id="gioi-thieu"></a>
+## Giới Thiệu
+
+Đây là dự án cửa thông minh hoàn chỉnh chạy trên ESP32 CP2102, kết hợp điều khiển phần cứng tại chỗ (keypad, LCD, servo, buzzer), đồng bộ cloud bằng Firebase Realtime Database và giao diện web quản trị/điều khiển.
+
+### Điểm nổi bật
+- Xác thực PIN trên keypad, khóa tạm khi nhập sai nhiều lần.
+- Đồng bộ tài khoản admin/user giữa ESP32 và Firebase.
+- OTP một lần có thời hạn và đánh dấu đã dùng.
+- Điều khiển cửa bằng web cloud và web local trên ESP32.
+- Điều khiển đèn WS2813 với đồng bộ màu RGB thời gian thực.
+- Hỗ trợ giọng nói trên web: mở/đóng cửa, bật/tắt đèn.
+- Backend đã có các tối ưu để chạy online ổn định hơn.
+
+---
+<a id="muc-luc"></a>
+## Mục Lục
+
+- [Giới Thiệu](#gioi-thieu)
+- [Kiến Trúc Hệ Thống](#kien-truc-he-thong)
+- [Công Nghệ Sử Dụng](#cong-nghe-su-dung)
+- [Tính Năng Chính](#tinh-nang-chinh)
+- [Cấu Trúc Dự Án](#cau-truc-du-an)
+- [Bắt Đầu Nhanh](#bat-dau-nhanh)
+- [Cấu Hình](#cau-hinh)
+- [API Local (ESP32)](#api-local-esp32)
+- [Luồng Dữ Liệu Firebase](#luong-du-lieu-firebase)
+- [Checklist Kiểm Thử](#checklist-kiem-thu)
+- [Lộ Trình](#lo-trinh)
+- [Đóng Góp](#dong-gop)
+- [Giấy Phép](#giay-phep)
+
+---
+<a id="kien-truc-he-thong"></a>
+## Kiến Trúc Hệ Thống
+
+```text
+Keypad/LCD/Servo/Buzzer/Đèn
+            |
+            v
+   Firmware ESP32 (module .ino)
+      |                   |
+      | Web local         | Đồng bộ cloud
+      v                   v
+  Trình duyệt LAN      Firebase RTDB
+                            |
+                            v
+                 Web Dashboard (Frontend)
+```
+
+---
+<a id="cong-nghe-su-dung"></a>
+## Công Nghệ Sử Dụng
+
+### Firmware
+- ESP32 CP2102
+- Arduino C++
+- WiFiManager
+- Firebase ESP Client
+- LiquidCrystal_I2C, Keypad, ESP32Servo
+
+### Cloud
+- Firebase Realtime Database
+- Firebase Authentication (đăng nhập web)
+
+### Frontend
+- HTML5, CSS3, JavaScript thuần
+- Web Speech API (lệnh giọng nói)
+
+---
+<a id="tinh-nang-chinh"></a>
+## Tính Năng Chính
+
+### Phần cứng và firmware
+- Xác thực keypad, chỉ admin đổi mật khẩu trên keypad.
+- Khóa tạm 10s và đếm ngược trên LCD sau 3 lần sai.
+- Servo mở/đóng cửa, có nút trong nhà.
+- Buzzer phản hồi theo ngữ cảnh (bấm phím/thành công/lỗi/lockout).
+- LCD I2C hiển thị theo state machine.
+
+### Tích hợp cloud
+- Nhận lệnh realtime cho cửa và đèn.
+- Upload trạng thái cửa, khóa, WiFi, màu đèn RGB.
+- Đồng bộ OTP một lần và trạng thái đã dùng.
+- Đồng bộ tài khoản admin/user.
+- Ghi log lịch sử có actor/auth/source.
+
+### Đèn thông minh WS2813
+- Bật/tắt và chỉnh màu RGB.
+- Nút cứng bật/tắt đèn.
+- Điều khiển qua API local và command cloud.
+- Color picker realtime trên frontend.
+
+### Web app
+- Trang đăng nhập với Firebase Auth.
+- Dashboard chính cho cửa, đèn, OTP, voice.
+- Trang lịch sử, trang quản lý tài khoản, trang cài đặt.
+- Settings: đổi theme, đổi mật khẩu account.
+- Khối WiFi ở Settings là chỉ hiển thị (đã bỏ scan/connect).
+
+### Tối ưu độ ổn định
+- Mỗi vòng loop chỉ xử lý tối đa 1 tác vụ mạng.
+- Gộp cập nhật trạng thái Firebase bằng JSON.
+- Timeout mạng theo hướng fail-fast.
+- I2C LCD dùng cấu hình ổn định hơn.
+
+---
+<a id="cau-truc-du-an"></a>
+## Cấu Trúc Dự Án
+
+```text
+smart home/
+├── backend/
+│   ├── README.md
+│   └── esp32_cp2102/
+│       ├── esp32_cp2102.ino
+│       ├── config.h
+│       ├── wifi_config.h
+│       ├── wifi_functions.ino
+│       ├── webserver_functions.ino
+│       ├── firebase_config.h
+│       ├── firebase_functions.ino
+│       ├── access_control_functions.ino
+│       ├── otp_functions.ino
+│       ├── light_led_functions.ino
+│       └── pin_mapping_esp32.md
+├── frontend/
+│   ├── index.html
+│   ├── login.html
+│   ├── admin.html
+│   ├── history.html
+│   ├── settings.html
+│   ├── css/
+│   └── js/
+├── docs/
+│   ├── FEATURES.md
+│   ├── firebase_schema.json
+│   ├── firebase_accounts_patch.json
+│   └── firebase_link.txt
+├── PROJECT_STRUCTURE.md
+├── README.md
+└── README.vi
+```
+
+---
+<a id="bat-dau-nhanh"></a>
+## Bắt Đầu Nhanh
+
+### 1) Phần cứng cần có
+- ESP32 CP2102
+- Keypad 4x4
+- LCD 16x2 I2C
+- Servo (khuyến nghị nguồn 5V riêng)
+- Buzzer
+- Dải LED WS2813
+- Nguồn ổn định và nối chung GND
+
+### 2) Nạp firmware
+```bash
+# Mở bằng Arduino IDE
+backend/esp32_cp2102/esp32_cp2102.ino
+
+# Chọn board và COM rồi Upload
+```
+
+### 3) Chạy frontend
+- Điền cấu hình Firebase tại `frontend/js/firebase-config.js`.
+- Mở `frontend/login.html` để đăng nhập.
+- Vào `frontend/index.html` để điều khiển.
+
+---
+<a id="cau-hinh"></a>
+## Cấu Hình
+
+Cần cập nhật trước khi triển khai:
+- `backend/esp32_cp2102/config.h`
+- `backend/esp32_cp2102/wifi_config.h`
+- `backend/esp32_cp2102/firebase_config.h`
+- `frontend/js/firebase-config.js`
+
+Khuyến nghị kiểm tra:
+- URL và khóa Firebase
+- Đường dẫn device trong RTDB
+- Mapping chân đúng với mạch thật
+
+---
+<a id="api-local-esp32"></a>
+## API Local (ESP32)
+
+| Endpoint | Method | Chức năng |
+|---|---|---|
+| `/` | GET | Trang điều khiển local |
+| `/open` | GET | Mở cửa |
+| `/close` | GET | Đóng cửa |
+| `/status` | GET | Trả JSON trạng thái |
+| `/resetwifi` | GET | Xóa WiFi và vào chế độ cấu hình |
+| `/light/on` | GET | Bật đèn |
+| `/light/off` | GET | Tắt đèn |
+| `/light/toggle` | GET | Đảo trạng thái đèn |
+| `/light/set?r=&g=&b=` | GET | Đặt màu RGB |
+
+---
+<a id="luong-du-lieu-firebase"></a>
+## Luồng Dữ Liệu Firebase
+
+- ESP32 ghi trạng thái thiết bị dưới `devices/...`
+- Frontend ghi lệnh dưới `commands/...`
+- ESP32 đọc lệnh, thực thi, cập nhật trạng thái
+- ESP32 ghi log vào `history/logs`
+- Đồng bộ tài khoản/OTP qua nhánh `config/...` và `otp/...`
+
+Chi tiết schema xem [docs/firebase_schema.json](docs/firebase_schema.json).
+
+---
+<a id="checklist-kiem-thu"></a>
+## Checklist Kiểm Thử
+
+1. Nạp firmware và kiểm tra log khởi động.
+2. Test tốc độ nhập keypad và âm buzzer.
+3. Test lockout + countdown trên LCD.
+4. Test mở/đóng cửa cả local và cloud.
+5. Test bật/tắt/chỉnh màu đèn từ frontend.
+6. Test lệnh giọng nói cửa và đèn.
+7. Để online 5-10 phút, quan sát độ ổn định.
+8. Kiểm tra log lịch sử trong Firebase.
+
+---
+<a id="lo-trinh"></a>
+## Lộ Trình
+
+- [ ] Thêm watchdog và thống kê lỗi phục hồi.
+- [ ] Viết integration test cho luồng command Firebase.
+- [ ] Bổ sung lớp truyền MQTT (tùy chọn).
+- [ ] Nâng cấp bộ lọc/export lịch sử.
+- [ ] Bổ sung màn hình chẩn đoán phần cứng.
+
+---
+<a id="dong-gop"></a>
+## Đóng Góp
+
+Chào mừng đóng góp cho dự án.
+
+1. Fork repository.
+2. Tạo branch mới cho tính năng.
+3. Commit theo nhóm thay đổi rõ ràng.
+4. Mở pull request kèm ghi chú kiểm thử.
+
+---
+<a id="giay-phep"></a>
+## Giấy Phép
+
+Dự án hiện được duy trì phục vụ học tập và trình diễn kỹ thuật.
+Khi tái sử dụng hoặc phân phối lại, vui lòng tuân theo quy định của nhóm/trường hoặc đơn vị sở hữu mã nguồn.
