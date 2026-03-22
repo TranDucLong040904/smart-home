@@ -1,37 +1,100 @@
-# Cửa thông minh – hướng dẫn nhanh
+# Smart Home Door System (ESP32 + Firebase)
 
-## Mục tiêu
+He thong khoa cua thong minh su dung ESP32 CP2102, keypad, LCD, servo, buzzer, va web app dieu khien qua Firebase.
 
-- Hệ thống khóa cửa thông minh: PIN/OTP, đổi mật khẩu, chống dò, log sự kiện, điều khiển qua cloud (Firebase hoặc MQTT), OTA.
+## Highlights
+- Xac thuc PIN tren keypad, lockout sau 3 lan sai.
+- Quan ly admin/user, dong bo cloud - thiet bi.
+- OTP 6 so one-time co thoi han.
+- Dieu khien cua tu web (cloud) va local web server (ESP32).
+- Smart light WS2813: ON/OFF/RGB, dong bo 2 chieu.
+- Voice commands tren web: mo/dong cua, bat/tat den.
+- Dang nhap Firebase Auth cho frontend pages.
 
-## Cấu trúc thư mục
+## Tech stack
+- Firmware: Arduino C++ (ESP32).
+- Cloud: Firebase Realtime Database, Firebase Auth.
+- Frontend: HTML + CSS + Vanilla JavaScript.
 
-- backend/: mã C++ cho ESP8266 (Arduino IDE) – sẽ chứa firmware.
-- frontend/: web UI điều khiển (sẽ xây sau).
-- docs/: tài liệu ([SRS_smart_door.md](docs/SRS_smart_door.md), checklist).
-- plan.md: kế hoạch tổng quan.
-- **PROJECT_STRUCTURE.md**: Mô tả chi tiết cấu trúc dự án (⭐ Đọc để hiểu tổ chức file).
+## Repository layout
+- `backend/esp32_cp2102`: firmware module cho ESP32.
+- `frontend`: giao dien web (login/index/history/admin/settings).
+- `docs`: schema, danh sach tinh nang, tai lieu bo sung.
 
-## Thiết lập nhanh (firmware)
+Chi tiet cay file xem tai [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md).
 
-- Công cụ: Arduino IDE (hoặc PlatformIO), board ESP8266 đã cài trong Boards Manager.
-- Thư viện cần cài (dự kiến): Keypad, LiquidCrystal_I2C, Servo, EEPROM, WiFi, WiFiManager (provisioning), NTP (time), ArduinoOTA, MQTT/Firebase client.
-- Nguồn: servo cấp riêng 5–6V, chung GND với ESP8266; thêm tụ >=470µF để chống sụt áp.
-- Keypad layout 4x4: { {1,2,3,A}, {4,5,6,B}, {7,8,9,C}, {\*,0,#,D} }; D=Enter, A=Delete, C=Đổi MK, B=Cancel/Lock.
+## Firmware modules
+Trong `backend/esp32_cp2102`:
+- `esp32_cp2102.ino`: setup/loop va state machine chinh.
+- `wifi_functions.ino`: WiFiManager non-blocking.
+- `webserver_functions.ino`: endpoint local HTTP.
+- `firebase_functions.ino`: dong bo cloud + nhan lenh.
+- `access_control_functions.ino`: admin/user + policy.
+- `otp_functions.ino`: OTP one-time flow.
+- `light_led_functions.ino`: WS2813 light module.
+- `config.h`, `wifi_config.h`, `firebase_config.h`: cau hinh.
 
-## Tài liệu liên quan
+## Quick start
 
-- Yêu cầu chi tiết: docs/SRS_smart_door.md
-- Kế hoạch thực hiện: plan.md
-- Checklist tiến độ: docs/checklist.md
-- **Sơ đồ chân nối:** docs/hardware_wiring.md (⭐ Đọc trước khi lắp mạch)
-- Lịch sử thay đổi: docs/CHANGELOG.md
-- Nhật ký test: docs/testing_log.md
+### 1) Hardware
+- ESP32 CP2102
+- Keypad 4x4
+- LCD I2C 16x2
+- Servo (nguon rieng khuyen nghi)
+- Buzzer
+- WS2813 LED strip + nut dieu khien den
+- Day noi + nguon on dinh, chung GND
 
-## Handover cho coder khác
+### 2) Arduino IDE
+- Cai board package ESP32.
+- Mo `backend/esp32_cp2102/esp32_cp2102.ino`.
+- Cai cac thu vien can thiet (theo `backend/README.md`).
+- Dien thong tin WiFi/Firebase trong file config.
+- Chon board/COM, build va upload.
 
-- Đọc SRS và plan để nắm yêu cầu và lộ trình.
-- **Đọc hardware_wiring.md để biết sơ đồ chân chính xác** (Phương án A - Giữ Serial Debug).
-- Xem checklist để biết trạng thái việc đã làm/chưa làm.
-- Khi bắt đầu code firmware: chuẩn bị thư viện trên, giữ cấu hình Wi-Fi/cloud ngoài mã (provisioning, file config).
-- **Lưu ý:** GPIO0 (D3) cần pull-up 10kΩ, GPIO15 (D8) cần pull-down 10kΩ.
+### 3) Frontend
+- Cau hinh Firebase trong `frontend/js/firebase-config.js`.
+- Mo `frontend/login.html` de dang nhap.
+- Sau dang nhap, vao `frontend/index.html` de dieu khien.
+
+## Main features
+
+### Door and access
+- Nhap PIN tren keypad.
+- Admin doi mat khau tren keypad.
+- Lockout 10s khi sai 3 lan.
+- Mo/dong cua tu web cloud va local web.
+
+### Cloud sync
+- Dong bo trang thai cua, WiFi, den.
+- Nhan lenh cloud cho cua va den.
+- Ghi lich su su kien co timestamp.
+
+### Smart light
+- Bat/tat nhanh.
+- Dat mau RGB qua web.
+- Dong bo realtime trang thai den.
+
+### Settings and account
+- Login bao ve bang Firebase Auth.
+- Quan ly admin/user realtime.
+- Chan trung username/password trong admin UI.
+- Settings page co theme + doi mat khau.
+- WiFi card tren settings la display-only (khong scan/connect).
+
+## Runtime stability notes
+Ban hien tai da co mot so toi uu de giam lag khi online:
+- Han che so tac vu mang moi vong loop.
+- Gop request status Firebase thanh 1 JSON write.
+- Dieu chinh timeout mang theo huong fail-fast.
+- Tang do on dinh LCD I2C (timeout + bus speed conservative).
+
+## Suggested test flow after flashing
+1. Online idle 3-5 phut, theo doi treo/lag.
+2. Bam keypad lien tuc, kiem tra do tre va buzzer.
+3. Gui lenh cloud dong thoi bam keypad.
+4. Kiem tra LCD co con loi ky tu ngau nhien hay khong.
+
+## Notes
+- Du an dang toi uu theo huong: it chinh luong nghiep vu cu, de trien khai, de bao tri.
+- Neu can thong tin chi tiet tinh nang, xem [docs/FEATURES.md](docs/FEATURES.md).

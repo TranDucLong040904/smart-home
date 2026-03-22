@@ -112,6 +112,8 @@ unsigned long lastIndoorButtonPress = 0;
 
 /* ================= BUZZER ================= */
 void beep(int t = 80) {
+  // Ensure PWM tone channel is released before digital HIGH/LOW beep
+  noTone(BUZZER_PIN);
   pinMode(BUZZER_PIN, OUTPUT);
   digitalWrite(BUZZER_PIN, HIGH);
   delay(t);
@@ -149,7 +151,6 @@ void beepKey() { beep(30); }
 void beepSuccess() {
   // Giai điệu thành công: Do-Mi-Sol (C-E-G)
   pinMode(BUZZER_PIN, OUTPUT);
-
   tone(BUZZER_PIN, 523); // Do (C)
   delay(150);
   tone(BUZZER_PIN, 659); // Mi (E)
@@ -211,7 +212,8 @@ void setup() {
   // LCD
   Wire.begin(LCD_SDA_PIN, LCD_SCL_PIN);
   delay(50);             // Chờ LCD sẵn sàng sau khi cấp nguồn
-  Wire.setClock(60000);  // I2C ~60kHz để tăng ổn định khi dây dài/nhiễu
+  Wire.setTimeOut(50);   // Tránh treo bus khi nhiễu I2C thoáng qua
+  Wire.setClock(40000);  // I2C chuẩn 40kHz để giảm lỗi ký tự ngẫu nhiên
   lcd.init();
   lcd.backlight();
 

@@ -1,318 +1,120 @@
-# Smart Door - Tính năng đã hoàn thành
+# Smart Door - Features (Current)
 
-> **Cập nhật lần cuối:** 2026-03-19  
-> **Trạng thái:** ~96% hoàn thành
+> Last updated: 2026-03-22
+> Status: Core flow stable, cloud + web + smart light integrated
 
----
+## 1) Backend (ESP32 CP2102)
 
-## 🔧 PHẦN CỨNG (Backend - ESP32 CP2102)
+### 1.1 Access control and keypad
+- Keypad 4x4: `A` xoa, `D` enter, `C` doi mat khau (admin).
+- PIN xac thuc tu EEPROM.
+- Lockout 10s sau 3 lan sai.
+- Countdown lockout hien thi tren LCD.
+- Session auth timeout 5s.
+- Phan quyen keypad: admin + user cloud.
 
-### 1. Keypad & Xác thực PIN
+### 1.2 Password policy
+- Luu mat khau trong EEPROM.
+- Mat khau toi thieu 6 ky tu.
+- Chan mat khau yeu: ngay sinh, lap lai, lien tiep.
+- Khong cho dat lai mat khau trung mat khau cu.
 
-| Tính năng           | Mô tả                                                     |
-| ------------------- | --------------------------------------------------------- |
-| ✅ Keypad 4x4       | Nhập PIN bằng phím 0-9, A (Xóa), C (Đổi MK), D (OK/Enter) |
-| ✅ Xác thực PIN     | So sánh với PIN lưu trong EEPROM                          |
-| ✅ Khóa tạm 10s     | Sau 3 lần nhập sai, khóa hệ thống 10 giây                 |
-| ✅ Countdown LCD    | Hiển thị đếm ngược thời gian khóa trên màn hình LCD       |
-| ✅ Timeout xác thực | Phiên đăng nhập hết hạn sau 5 giây, quay về màn hình nhập |
-| ✅ Phân quyền keypad | 1 admin (EEPROM) + tối đa 10 user (cloud)                 |
-| ✅ Rule đổi mật khẩu | Chỉ admin đổi được mật khẩu trên keypad                    |
+### 1.3 Door control
+- Servo mo/dong cua.
+- Nut trong nha toggle mo/dong.
+- Debounce cho nut trong nha.
+- Tu dong dong cua sau 10s voi lenh mo tu web/cloud.
 
-### 2. Quản lý mật khẩu (EEPROM)
+### 1.4 LCD + buzzer
+- LCD I2C 16x2 hien thi trang thai theo state machine.
+- Buzzer giu pattern am thanh cu:
+  - Bam phim: bip ngan 30ms
+  - Thanh cong: Do-Mi-Sol
+  - Sai mat khau: 3 bip
+  - Lockout: siren ngan
+  - Doi MK thanh cong: Sol-Do cao
+- Bo sung on dinh:
+  - Giai phong `tone()` truoc beep digital de tranh mat tieng.
+  - I2C timeout + toc do bus 40kHz de giam loi ky tu LCD.
 
-| Tính năng                  | Mô tả                                   |
-| -------------------------- | --------------------------------------- |
-| ✅ Lưu mật khẩu            | Lưu vào EEPROM, không mất khi tắt nguồn |
-| ✅ Mật khẩu mặc định       | `123456` khi khởi tạo lần đầu           |
-| ✅ Đổi mật khẩu            | Nhập MK mới → Xác nhận → Lưu EEPROM     |
-| ✅ Quy tắc độ mạnh         | Tối thiểu 6 ký tự                       |
-| ✅ Chặn MK yếu - Ngày sinh | Chặn ddMM, ddMMyy, ddMMyyyy             |
-| ✅ Chặn MK yếu - Lặp lại   | Chặn 111111, 000000, ...                |
-| ✅ Chặn MK yếu - Liên tiếp | Chặn 123456, 654321, ...                |
-| ✅ Chặn MK trùng cũ        | Không cho phép đặt lại mật khẩu cũ      |
+### 1.5 WiFi and local web server
+- WiFiManager non-blocking.
+- AP config mode khi can cai lai WiFi.
+- Auto reconnect WiFi.
+- Web server local tach file rieng (`webserver_functions.ino`).
+- Endpoints local:
+  - `/`, `/open`, `/close`, `/status`, `/resetwifi`
+  - `/light/on`, `/light/off`, `/light/toggle`, `/light/set?r=&g=&b=`
 
-### 3. Servo & Điều khiển cửa
+### 1.6 Firebase Realtime Database
+- Auth bang Legacy Database Secret.
+- Dong bo trang thai cua + WiFi + den.
+- Nhan lenh cloud cho cua va den.
+- Dong bo OTP one-time + danh dau da dung.
+- Dong bo accounts admin/user tu cloud.
+- Ghi history log co actor/source/authMethod.
+- Toi uu runtime (khong doi logic cu):
+  - Moi vong loop chi xu ly toi da 1 tac vu mang.
+  - Giam timeout network de fail-fast khi mang xau.
+  - Gop nhieu field status thanh 1 request `setJSON`.
+  - Doc mau den bang 1 request `getJSON`.
 
-| Tính năng         | Mô tả                                                    |
-| ----------------- | -------------------------------------------------------- |
-| ✅ Mở cửa         | Servo quay đến góc 180°                                  |
-| ✅ Đóng cửa       | Servo quay về góc 0°                                     |
-| ✅ Giữ trạng thái | Servo giữ vị trí khi cửa đang mở                         |
-| ✅ Detach/Attach  | Tự động detach khi dùng buzzer để tránh nhiễu            |
-| ✅ Phím D đa năng | Cửa đang mở → bấm D đóng ngay; Cửa đóng → Enter xác thực |
+### 1.7 Smart light (WS2813)
+- Module den tach rieng (`light_led_functions.ino`).
+- Dieu khien ON/OFF/RGB.
+- Nut cung toggle den (GPIO14, debounce).
+- Dong bo 2 chieu qua Firebase.
+- Dieu khien qua web local va frontend cloud.
 
-### 4. Nút trong nhà (Indoor Button)
+## 2) Frontend (Web app)
 
-| Tính năng             | Mô tả                                  |
-| --------------------- | -------------------------------------- |
-| ✅ Toggle mở/đóng     | Bấm 1 lần để mở, bấm lần nữa để đóng   |
-| ✅ Debounce 200ms     | Chống nhấn liên tục gây lỗi            |
-| ✅ Bỏ qua khi lockout | Không hoạt động khi hệ thống đang khóa |
-| ✅ Dùng chung D0      | Time-multiplexing với Keypad Column 0  |
+### 2.1 Core pages
+- `login.html`: dang nhap Firebase Auth.
+- `index.html`: dashboard dieu khien cua, OTP, voice, smart light.
+- `history.html`: lich su su kien.
+- `admin.html`: quan ly tai khoan admin/user realtime.
+- `settings.html`: cai dat he thong + doi mat khau + theme.
 
-### 5. LCD 16x2 (I2C)
+### 2.2 Door and cloud control
+- Nhan/truyen trang thai realtime tu Firebase.
+- Nut mo/dong cua tren web.
+- Badge va thong bao trang thai ket noi.
 
-| Tính năng            | Mô tả                                                   |
-| -------------------- | ------------------------------------------------------- |
-| ✅ Màn hình nhập PIN | "Nhap mat khau:" + hiển thị ký tự nhập                  |
-| ✅ Màn hình mở khóa  | "Da mo khoa", "C: Doi MK"                               |
-| ✅ Màn hình đổi MK   | "Nhap MK moi:", "Nhap lai MK"                           |
-| ✅ Màn hình lockout  | "Khoa tam thoi", countdown                              |
-| ✅ Thông báo lỗi     | Hiển thị lý do MK yếu (ngắn, ngày sinh, lặp, liên tiếp) |
+### 2.3 Voice control
+- Ho tro lenh Viet/Anh:
+  - Mo cua / Dong cua
+  - Bat den / Tat den
 
-### 6. Buzzer (Audio Feedback)
+### 2.4 OTP UI
+- Tao OTP 6 so.
+- Chon thoi han.
+- Countdown + xoa OTP.
 
-| Tính năng             | Âm thanh                                          |
-| --------------------- | ------------------------------------------------- |
-| ✅ Bấm phím           | Tiếng "bíp" ngắn 30ms                             |
-| ✅ Mở khóa thành công | 🎵 Do-Mi-Sol (C-E-G)                              |
-| ✅ Nhập sai           | 3 tiếng "bíp" liên tiếp                           |
-| ✅ Lockout/Cảnh báo   | 🔊 Siren lên xuống 2 chu kỳ                       |
-| ✅ Đổi MK thành công  | 🎵 Sol-Do cao (G-C)                               |
-| ✅ Đóng cửa           | Tiếng "bíp" 100ms                                 |
-| ✅ Time-multiplexing  | Dùng chung D8 với Servo, tự quản lý attach/detach |
+### 2.5 Account management
+- Admin duy nhat (chi sua, khong them/xoa).
+- CRUD user realtime.
+- Gioi han toi da 10 user.
+- Chan trung username/password khi tao va sua.
 
-### 7. WiFi Module (Non-Blocking)
+### 2.6 Settings page
+- Theme light/dark + luu localStorage.
+- Doi mat khau account dang nhap (reauth).
+- Hien thi thong tin app.
+- WiFi card hien thi trang thai hien tai (display-only), da loai bo scan/connect.
 
-| Tính năng                | Mô tả                                               |
-| ------------------------ | --------------------------------------------------- |
-| ✅ WiFiManager           | Captive Portal cấu hình WiFi qua AP                 |
-| ✅ AP Mode               | Tên: `SmartDoor_Config`, Pass: `12345678`           |
-| ✅ Non-blocking          | Keypad hoạt động bình thường trong khi WiFi kết nối |
-| ✅ Config Portal Timeout | 3 phút tự động tắt portal                           |
-| ✅ Connect Timeout       | 10 giây timeout khi đang kết nối                    |
-| ✅ Auto-reconnect        | Tự kết nối lại khi mất sóng                         |
-| ✅ Status check          | Kiểm tra trạng thái WiFi mỗi 5 giây                 |
+### 2.7 Smart light UI
+- Card dieu khien den rieng.
+- Nut bat/tat nhanh.
+- Color chip + popup color picker.
+- Hien thi HEX + RGB realtime.
+- Fix hien tuong con tro mau bi giat/reset khi dang keo.
+- Responsive mobile, uu tien card voice o tren.
 
-### 8. Web Server Local (ESP32)
+## 3) Current repo highlights
+- Firmware da tach module ro rang: main/wifi/webserver/firebase/light/access/otp.
+- Frontend da tach js/css theo tung trang.
+- Tai lieu schema Firebase da cap nhat cho nhanh `light` command/state.
 
-| Endpoint        | Method | Chức năng                                 |
-| --------------- | ------ | ----------------------------------------- |
-| ✅ `/`          | GET    | Trang HTML điều khiển với giao diện đẹp   |
-| ✅ `/open`      | GET    | Mở cửa                                    |
-| ✅ `/close`     | GET    | Đóng cửa                                  |
-| ✅ `/status`    | GET    | JSON trạng thái: door, locked, wifi, light |
-| ✅ `/resetwifi` | GET    | Xóa WiFi credentials, restart vào AP mode |
-| ✅ `/light/on`  | GET    | Bật đèn WS2813                            |
-| ✅ `/light/off` | GET    | Tắt đèn WS2813                            |
-| ✅ `/light/toggle` | GET | Đảo trạng thái đèn                         |
-| ✅ `/light/set` | GET    | Đặt màu RGB qua query r,g,b               |
-
-### 9. Firebase Realtime Database
-
-| Tính năng               | Mô tả                                                     |
-| ----------------------- | --------------------------------------------------------- |
-| ✅ Database Secret Auth | Sử dụng Legacy Token (đơn giản, không cần Authentication) |
-| ✅ Upload trạng thái    | Cập nhật door/locked/online mỗi 2 giây                    |
-| ✅ Nhận lệnh từ cloud   | Check commands/action mỗi 500ms                           |
-| ✅ Thực thi lệnh        | Mở/đóng cửa từ lệnh Firebase                              |
-| ✅ Ghi log sự kiện      | Push log với server timestamp                             |
-| ✅ Non-blocking         | Không ảnh hưởng hoạt động keypad                          |
-| ✅ OTP one-time         | Đồng bộ OTP 6 số từ `/otp`, cache cục bộ, 3s/lần          |
-| ✅ OTP hết hạn/bỏ trống | Từ chối OTP hết hạn hoặc không có `expiresAt`             |
-| ✅ OTP dùng rồi         | Đánh dấu `used: true` lên Firebase sau khi mở cửa         |
-| ✅ Sync accounts 5s      | Đồng bộ admin/user từ `/config/.../accounts`              |
-| ✅ Admin sync 2 chiều    | Đổi trên web cập nhật keypad, đổi trên keypad cập nhật web |
-| ✅ Log actor/method      | Log có `actorName`, `actorRole`, `authMethod`, `source`   |
-| ✅ Sync trạng thái đèn   | Cập nhật `devices/.../light/{on,r,g,b}` từ ESP            |
-| ✅ Nhận lệnh đèn cloud   | Đọc `commands/.../light/action` (on/off/toggle/set)       |
-| ✅ Nhận màu RGB cloud    | Đọc `commands/.../light/color/{r,g,b}`                    |
-
-### 10. Smart Light WS2813 (Backend)
-
-| Tính năng                  | Mô tả                                                          |
-| -------------------------- | -------------------------------------------------------------- |
-| ✅ Module riêng cho đèn     | Tách file backend đèn để quản lý độc lập                       |
-| ✅ Bật/tắt bằng nút cứng    | Nút G14 với INPUT_PULLUP, debounce 200ms                       |
-| ✅ Điều khiển RGB           | Lưu và áp dụng trạng thái màu r,g,b                            |
-| ✅ Điều khiển web local     | Bật/tắt/đổi màu trực tiếp từ web server local                  |
-| ✅ Đồng bộ cloud            | Trạng thái đèn và lệnh đèn đồng bộ 2 chiều qua Firebase        |
-
-
----
-
-## 💻 PHẦN MỀM (Frontend - Web App)
-
-### 1. Giao diện tổng thể
-
-| Tính năng             | Mô tả                                          |
-| --------------------- | ---------------------------------------------- |
-| ✅ Dark Glassmorphism | Thiết kế hiện đại với hiệu ứng mờ kính         |
-| ✅ Responsive Design  | Tương thích desktop, tablet, mobile            |
-| ✅ Header             | Logo, Navigation, Clock realtime, Status badge |
-| ✅ Bottom Navigation  | Menu dưới cho mobile                           |
-| ✅ Background Effects | Glow effects động                              |
-| ✅ Google Fonts       | Space Grotesk, Material Symbols                |
-
-### 2. Điều khiển cửa chính
-
-| Tính năng        | Mô tả                                   |
-| ---------------- | --------------------------------------- |
-| ✅ Nút Mở Cửa    | Gửi lệnh `open` lên Firebase            |
-| ✅ Nút Đóng Cửa  | Gửi lệnh `close` lên Firebase           |
-| ✅ Icon realtime | Thay đổi lock/lock_open theo trạng thái |
-| ✅ Status text   | Hiển thị "MỞ" (xanh) / "ĐÓNG" (đỏ)      |
-| ✅ Glow effect   | Hiệu ứng phát sáng theo trạng thái      |
-| ✅ Tự đóng 10s   | Lệnh mở từ web tự đóng sau 10s, có badge đếm ngược |
-
-### 3. Điều khiển giọng nói
-
-| Tính năng         | Mô tả                                  |
-| ----------------- | -------------------------------------- |
-| ✅ Web Speech API | Sử dụng SpeechRecognition              |
-| ✅ Tiếng Việt     | Nhận dạng "Mở cửa", "Đóng cửa", "Bật đèn", "Tắt đèn" |
-| ✅ Tiếng Anh      | Nhận dạng "Open", "Close"              |
-| ✅ Status display | Hiển thị trạng thái nghe và transcript |
-| ✅ Gợi ý lệnh     | Hiển thị các lệnh có thể nói           |
-
-### 4. Tạo mã OTP cho khách (UI)
-
-| Tính năng          | Mô tả                        |
-| ------------------ | ---------------------------- |
-| ✅ Chọn thời hạn   | Nhập giờ, phút, giây         |
-| ✅ Generate mã     | Tạo mã 6 số ngẫu nhiên       |
-| ✅ Countdown timer | Đếm ngược realtime           |
-| ✅ Lưu Firebase    | Gửi OTP lên cloud để ESP đọc |
-| ✅ Xóa OTP         | Nút xóa mã hiện tại          |
-
-### 5. Cài đặt WiFi (UI)
-
-| Tính năng                 | Mô tả                                     |
-| ------------------------- | ----------------------------------------- |
-| ✅ Hiển thị mạng hiện tại | SSID, IP thực từ ESP (Update realtime)    |
-| ✅ Toggle password        | Hiển/ẩn mật khẩu                          |
-| ✅ Quét mạng              | Nút scan với animation                    |
-| ✅ Danh sách mạng         | Hiển thị SSID, signal strength, lock icon |
-| ✅ Chọn mạng              | Click để chọn, hiện form nhập password    |
-| ✅ Kết nối                | Gửi credentials qua Firebase              |
-
-### 6. Firebase Integration
-
-| Tính năng             | Mô tả                                 |
-| --------------------- | ------------------------------------- |
-| ✅ Realtime listeners | Lắng nghe thay đổi từ `/devices`      |
-| ✅ Listener trạng thái đèn | Lắng nghe `devices/.../light` realtime |
-| ✅ Connection status  | Hiển thị "Đã kết nối" / "Mất kết nối" |
-| ✅ Send commands      | Gửi action lên `/commands`            |
-| ✅ Send light commands | Gửi `commands/.../light/action` và `color` |
-| ✅ Timestamp          | Sử dụng server timestamp              |
-
-### 7. Notification System
-
-| Tính năng              | Mô tả                                                         |
-| ---------------------- | ------------------------------------------------------------- |
-| ✅ Toast notifications | Popup góc phải dưới                                           |
-| ✅ 4 loại              | success (xanh), error (đỏ), warning (vàng), info (xanh dương) |
-| ✅ Icon động           | Icon tương ứng với loại thông báo                             |
-| ✅ Animation           | Slide-in/slide-out                                            |
-| ✅ Auto-dismiss        | Tự đóng sau 3 giây                                            |
-
-### 8. Clock
-
-| Tính năng          | Mô tả                             |
-| ------------------ | --------------------------------- |
-| ✅ Realtime clock  | Cập nhật mỗi giây                 |
-| ✅ Format Việt Nam | Giờ:Phút:Giây, Thứ ngày/tháng/năm |
-
-### 9. Quản lý tài khoản (Realtime)
-
-| Tính năng                | Mô tả                                                           |
-| ------------------------ | --------------------------------------------------------------- |
-| ✅ Admin duy nhất         | Chỉ sửa tên/mật khẩu admin, không thêm/xóa admin               |
-| ✅ User CRUD              | Thêm/sửa/xóa user realtime trên Firebase                        |
-| ✅ Giới hạn 10 user       | Chặn thêm quá 10 tài khoản user                                 |
-| ✅ Show/hide mật khẩu     | Hiển/ẩn mật khẩu cho cả admin và user                           |
-| ✅ Đồng bộ thiết bị       | ESP đồng bộ tài khoản để xác thực trực tiếp từ keypad           |
-| ✅ Ngày tạo tài khoản     | Hiển thị ngày tạo định dạng dd/mm/yyyy                          |
-
-### 10. Đăng nhập & Bảo mật (Firebase Auth)
-
-| Tính năng              | Mô tả                                            |
-| ---------------------- | ------------------------------------------------ |
-| ✅ Trang đăng nhập     | Giao diện glassmorphism đẹp, responsive          |
-| ✅ Firebase Auth       | Xác thực Email/Password                          |
-| ✅ Bảo vệ trang        | Redirect về login nếu chưa đăng nhập             |
-| ✅ Session persistence | Nhớ đăng nhập, không cần login lại mỗi lần vào   |
-| ✅ Show/hide password  | Toggle hiển thị mật khẩu                         |
-| ✅ Error handling      | Thông báo lỗi khi sai email/password             |
-| ✅ Loading state       | Hiển thị spinner khi đang đăng nhập              |
-| ✅ Security Rules      | Chỉ user đã đăng nhập mới truy cập được Firebase |
-
-### 11. Trang Cài Đặt
-
-| Tính năng            | Mô tả                                      |
-| -------------------- | ------------------------------------------ |
-| ✅ Trang Settings    | Trang riêng cho cấu hình hệ thống          |
-| ✅ Cài đặt WiFi      | Chuyển từ trang Điều khiển sang Settings   |
-| ✅ Dark/Light mode   | Toggle giao diện tối/sáng với localStorage |
-| ✅ Light theme       | Giao diện trẻ trung, bắt mắt   |
-| ✅ Theme persistence | Lưu lựa chọn theme vào localStorage        |
-| ✅ Thông tin user    | Hiển thị email đang đăng nhập              |
-| ✅ Đổi mật khẩu      | Form đổi MK với validation đầy đủ          |
-| ✅ Re-authentication | Xác thực lại trước khi đổi MK              |
-| ✅ Nút đăng xuất     | Logout khỏi Firebase Auth                  |
-| ✅ Thông tin app     | Version, Developer, Year                   |
-
-### 12. Điều khiển đèn thông minh (UI)
-
-| Tính năng                      | Mô tả                                                     |
-| ------------------------------ | --------------------------------------------------------- |
-| ✅ Card điều khiển đèn riêng    | Trạng thái bật/tắt + RGB realtime từ Firebase             |
-| ✅ Bật/Tắt nhanh                | Nút thao tác trực tiếp gửi lệnh cloud                     |
-| ✅ Ô màu preview                | Hiển thị màu hiện tại, click để mở bộ chọn màu            |
-| ✅ Color picker popup           | Kéo-thả điểm chọn màu, xác nhận bằng nút OK               |
-| ✅ Giữ điểm màu khi đang chọn   | Không bị reset vị trí khi dữ liệu cloud cập nhật realtime  |
-| ✅ HEX + RGB realtime           | Hiển thị đồng thời mã HEX và giá trị RGB                  |
-| ✅ Responsive mobile            | Tối ưu bố cục card đèn trên màn hình nhỏ                  |
-| ✅ Sắp xếp mobile ưu tiên Voice | Card giọng nói hiển thị đầu danh sách trên mobile/tablet  |
-
----
-
-## 📊 Thống kê
-
-| Hạng mục                  | Số tính năng      |
-| ------------------------- | ----------------- |
-| Phần cứng - Keypad        | 5                 |
-| Phần cứng - EEPROM        | 8                 |
-| Phần cứng - Servo         | 5                 |
-| Phần cứng - Indoor Button | 4                 |
-| Phần cứng - LCD           | 5                 |
-| Phần cứng - Buzzer        | 7                 |
-| Phần cứng - WiFi          | 7                 |
-| Phần cứng - Web Server    | 9                 |
-| Phần cứng - Firebase      | 13                |
-| Phần cứng - Smart Light   | 5                 |
-| **Tổng phần cứng**        | **68**            |
-| Phần mềm - UI             | 6                 |
-| Phần mềm - Door Control   | 6                 |
-| Phần mềm - Voice          | 6                 |
-| Phần mềm - OTP            | 5                 |
-| Phần mềm - WiFi UI        | 6                 |
-| Phần mềm - Firebase       | 6                 |
-| Phần mềm - Notification   | 5                 |
-| Phần mềm - Clock          | 2                 |
-| Phần mềm - Login & Auth   | 8                 |
-| Phần mềm - Settings Page  | 10                |
-| Phần mềm - Light UI       | 8                 |
-| **Tổng phần mềm**         | **68**            |
-| **TỔNG CỘNG**             | **136 tính năng** |
-
----
-
-## 📝 Lịch sử cập nhật
-
-| Ngày       | Nội dung                                                           |
-| ---------- | ------------------------------------------------------------------ |
-| 2026-01-25 | Tạo FEATURES.md; thêm nút trong nhà toggle, D đóng khi cửa đang mở |
-| 2026-01-27 | Thêm WiFi Module non-blocking, Web Server local                    |
-| 2026-01-28 | Tích hợp Firebase Realtime Database, Reset WiFi                    |
-| 2026-01-29 | Cập nhật đầy đủ 90 tính năng phần cứng + phần mềm                  |
-| 2026-02-02 | Thêm tính năng Đăng nhập & Bảo mật với Firebase Auth (8 tính năng) |
-| 2026-02-02 | Thêm trang Cài Đặt với WiFi, Dark mode UI, Logout, Đổi MK          |
-| 2026-02-02 | Hoàn thiện Light mode với theme trắng - xanh da trời               |
-| 2026-02-02 | Tinh chỉnh Date Picker light-mode (màu sáng + shadow)              |
-| 2026-02-26 | Auto-close 10s cho lệnh mở từ web + badge đếm ngược trên UI        |
-| 2026-03-01 | Hoàn thiện OTP backend: đồng bộ 3s/lần, timeout 2s, chặn hết hạn/không hạn, đánh dấu used |
-| 2026-03-07 | Hoàn thiện phân quyền keypad: admin EEPROM + user cloud, sync 2 chiều admin, tài khoản realtime trên web, log lịch sử có tên người/phương thức |
-| 2026-03-19 | Hoàn thiện Smart Light WS2813: tách module backend/webserver, sync Firebase trạng thái + lệnh + màu; thêm card đèn, popup chọn màu, lệnh giọng nói bật/tắt đèn, tối ưu bố cục mobile |
+## 4) Notes
+- Hien tai luong nghiep vu cu (xac thuc/mo khoa/lockout) duoc giu nguyen.
+- Cac toi uu gan day tap trung vao do tre online, do on dinh LCD, va do ben cloud sync.

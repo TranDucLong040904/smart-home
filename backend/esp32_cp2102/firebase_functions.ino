@@ -36,9 +36,9 @@ unsigned long lastCommandCheck = 0;
 unsigned long lastOtpCheck = 0;
 unsigned long lastAccountsCheck = 0;
 #define FIREBASE_UPDATE_INTERVAL 3000UL // Status 3s để giảm tải
-#define COMMAND_CHECK_INTERVAL 1000UL   // Lệnh mỗi 1s
-#define OTP_SYNC_INTERVAL 3000UL        // OTP mỗi 3s (non-critical)
-#define ACCOUNTS_SYNC_INTERVAL 5000UL   // Accounts mỗi 5s
+#define COMMAND_CHECK_INTERVAL 2000UL   // Lệnh mỗi 2s để giảm block
+#define OTP_SYNC_INTERVAL 4000UL        // OTP mỗi 4s (non-critical)
+#define ACCOUNTS_SYNC_INTERVAL 10000UL  // Accounts mỗi 10s
 
 /* ================= SETUP FIREBASE ================= */
 void setupFirebase() {
@@ -54,8 +54,8 @@ void setupFirebase() {
   config.signer.tokens.legacy_token = FIREBASE_DATABASE_SECRET;
 
   // Timeout ngắn để tránh block lâu khi mạng kém (API v4.x)
-  config.timeout.serverResponse = 2000;    // 2s
-  config.timeout.socketConnection = 5000;  // 5s
+  config.timeout.serverResponse = 1200;    // 1.2s
+  config.timeout.socketConnection = 2500;  // 2.5s
 
   // Initialize Firebase
   Firebase.begin(&config, &auth);
@@ -79,28 +79,29 @@ void handleFirebase() {
 
   unsigned long now = millis();
 
-  // Check for commands from cloud
+  // Mỗi vòng loop chỉ xử lý tối đa 1 tác vụ mạng để tránh dồn block
   if (now - lastCommandCheck >= COMMAND_CHECK_INTERVAL) {
     lastCommandCheck = now;
     checkCloudCommand();
+    return;
   }
 
-  // OTP sync tách riêng, chu kỳ dài hơn
   if (now - lastOtpCheck >= OTP_SYNC_INTERVAL) {
     lastOtpCheck = now;
     syncOtpFromCloud();
+    return;
   }
 
-  // Accounts sync (admin + users)
   if (now - lastAccountsCheck >= ACCOUNTS_SYNC_INTERVAL) {
     lastAccountsCheck = now;
     syncAccessControlFromCloud();
+    return;
   }
 
-  // Update device status to cloud
   if (now - lastFirebaseUpdate >= FIREBASE_UPDATE_INTERVAL) {
     lastFirebaseUpdate = now;
     updateDeviceStatus();
+    return;
   }
 }
 
@@ -111,22 +112,22 @@ void updateDeviceStatus() {
 
   String path = String(FB_PATH_DEVICES);
 
-  // Update door status
-  Firebase.RTDB.setString(&fbdo, path + "/door", doorOpen ? "open" : "closed");
-  Firebase.RTDB.setBool(&fbdo, path + "/locked", locked);
-  Firebase.RTDB.setBool(&fbdo, path + "/online", true);
-  Firebase.RTDB.setInt(&fbdo, path + "/lastUpdate", millis());
+  FirebaseJson statusJson;
+  statusJson.set("door", doorOpen ? "open" : "closed");
+  statusJson.set("locked", locked);
+  statusJson.set("online", true);
+  statusJson.set("lastUpdate", (int)millis());
 
-  // Update WiFi status
-  Firebase.RTDB.setString(&fbdo, path + "/wifi/ssid", WiFi.SSID());
-  Firebase.RTDB.setString(&fbdo, path + "/wifi/ip", WiFi.localIP().toString());
-  Firebase.RTDB.setInt(&fbdo, path + "/wifi/rssi", WiFi.RSSI());
+  statusJson.set("wifi/ssid", WiFi.SSID());
+  statusJson.set("wifi/ip", WiFi.localIP().toString());
+  statusJson.set("wifi/rssi", WiFi.RSSI());
 
-  // Update light status
-  Firebase.RTDB.setBool(&fbdo, path + "/light/on", isLightOn());
-  Firebase.RTDB.setInt(&fbdo, path + "/light/r", getLightR());
-  Firebase.RTDB.setInt(&fbdo, path + "/light/g", getLightG());
-  Firebase.RTDB.setInt(&fbdo, path + "/light/b", getLightB());
+  statusJson.set("light/on", isLightOn());
+  statusJson.set("light/r", getLightR());
+  statusJson.set("light/g", getLightG());
+  statusJson.set("light/b", getLightB());
+
+  Firebase.RTDB.setJSON(&fbdo, path, &statusJson);
 }
 
 /* ================= CHECK CLOUD COMMANDS ================= */
@@ -185,12 +186,16 @@ void checkCloudCommand() {
       int g = 255;
       int b = 255;
 
-      if (Firebase.RTDB.getInt(&fbdo, colorPath + "/r"))
-        r = fbdo.intData();
-      if (Firebase.RTDB.getInt(&fbdo, colorPath + "/g"))
-        g = fbdo.intData();
-      if (Firebase.RTDB.getInt(&fbdo, colorPath + "/b"))
-        b = fbdo.intData();
+      if (Firebase.RTDB.getJSON(&fbdo, colorPath)) {
+        FirebaseJson colorJson = fbdo.to<FirebaseJson>();
+        FirebaseJsonData field;
+        if (colorJson.get(field, "r") && field.success)
+          r = field.to<int>();
+        if (colorJson.get(field, "g") && field.success)
+          g = field.to<int>();
+        if (colorJson.get(field, "b") && field.success)
+          b = field.to<int>();
+      }
 
       if (r < 0)
         r = 0;
